@@ -38,6 +38,7 @@ obj-y		+= entry-v7m.o v7m.o
 else
 obj-y		+= entry-armv.o
 endif
+obj-$(CONFIG_CPU_HAS_CACHE) += cacheinfo.o
 
 obj-$(CONFIG_MMU)		+= bugs.o
 obj-$(CONFIG_CPU_IDLE)		+= cpuidle.o
