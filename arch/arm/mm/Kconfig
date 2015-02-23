@@ -522,29 +522,41 @@ config CPU_PABRT_V7
 # The cache model
 config CPU_CACHE_V4
 	bool
+	select CPU_HAS_CACHE
 
 config CPU_CACHE_V4WT
 	bool
+	select CPU_HAS_CACHE
 
 config CPU_CACHE_V4WB
 	bool
+	select CPU_HAS_CACHE
 
 config CPU_CACHE_V6
 	bool
+	select CPU_HAS_CACHE
 
 config CPU_CACHE_V7
 	bool
+	select CPU_HAS_CACHE
 
 config CPU_CACHE_NOP
 	bool
+	select CPU_HAS_CACHE
 
 config CPU_CACHE_VIVT
 	bool
+	select CPU_HAS_CACHE
 
 config CPU_CACHE_VIPT
 	bool
+	select CPU_HAS_CACHE
 
 config CPU_CACHE_FA
+	bool
+	select CPU_HAS_CACHE
+
+config CPU_HAS_CACHE
 	bool
 
 config CPU_CACHE_V7M
@@ -940,6 +952,7 @@ config VDSO
 
 config OUTER_CACHE
 	bool
+	select CPU_HAS_CACHE
 
 config OUTER_CACHE_SYNC
 	bool
