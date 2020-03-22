@@ -25,6 +25,9 @@
 
 #include "smp.h"
 
+/* XXX pen_release is cargo culted code - DO NOT COPY XXX */
+volatile int pen_release = -1;
+
 static void write_pen_release(int val)
 {
 	pen_release = val;
