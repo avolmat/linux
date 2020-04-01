@@ -368,7 +368,9 @@ static struct flash_info flash_types[] = {
 	{ "n25q128", 0x20ba18, 0, 64 * 1024,  256, N25Q_FLAG, 108,
 	  stfsm_n25q_config },
 	{ "n25q256", 0x20ba19, 0, 64 * 1024,  512,
-	  N25Q_FLAG | FLASH_FLAG_32BIT_ADDR, 108, stfsm_n25q_config },
+	  (N25Q_FLAG | FLASH_FLAG_32BIT_ADDR) &
+	  ~(FLASH_FLAG_WRITE_1_1_4 | FLASH_FLAG_WRITE_1_4_4),
+	  108, stfsm_n25q_config },
 
 	/*
 	 * Spansion S25FLxxxP
