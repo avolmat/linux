@@ -102,6 +102,9 @@ properties:
             the peripheral PCIe devices configuration space.
           const: config
         - description:
+            mem regions: fixme!
+          const: mem-window
+        - description:
             Vendor-specific CSR names. Consider using the generic names above
             for new bindings.
           oneOf:
