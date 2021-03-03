@@ -120,6 +120,9 @@
 		st,sata-gen = <2>; /* SATA GEN3 */
 		st,osc-rdy;
 	};
+	phy_port1: port@9b2a000 {
+		st,osc-force-ext;
+	};
 };
 
 &mmc0 {
