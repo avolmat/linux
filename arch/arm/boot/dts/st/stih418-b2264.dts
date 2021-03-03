@@ -152,6 +152,33 @@
 
 &spifsm {
 	status = "okay";
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		partition@0 {
+			label = "PBL"; /* 768Ko */
+			reg = < 0x0 0xc0000 >;
+			read-only;
+		};
+
+		partition@1 {
+			label = "u-boot-env"; /* 64Ko */
+			reg = < 0xc0000 0x10000 >;
+		};
+
+		partition@2 {
+			label = "mac-address-eth0"; /* 192Ko */
+			reg = < 0xd0000 0x30000 >;
+			read-only;
+		};
+
+		partition@3 {
+			label = "FIT"; /* 31 Mo */
+			reg = < 0x100000 0x1F00000 >;
+		};
+	};
 };
 
 &st_dwc3 {
