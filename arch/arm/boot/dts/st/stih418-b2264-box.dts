@@ -10,5 +10,15 @@
 	model = "STiH418 B2264 with Box";
 	compatible = "st,stih418-b2264-box", "st,stih418-b2264", "st,stih418";
 	soc {
+		/* I2C available on Pin 3 / Pin 5 of the GPIO 40 pins connector */
+		i2c@9540000 {
+			status = "okay";
+		};
 	};
+};
+
+&pwm1 {
+	pinctrl-0    = <&pinctrl_pwm1_chan0_default
+			&pinctrl_pwm1_chan1_default
+			&pinctrl_pwm1_chan3_default>;
 };
