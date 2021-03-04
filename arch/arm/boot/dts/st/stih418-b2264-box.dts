@@ -25,6 +25,15 @@
 				solomon,com-invdir;
 			};
 		};
+
+		leds {
+			compatible = "gpio-leds";
+			red {
+				label = "Front Panel LED";
+				gpios = <&pio4 1 GPIO_ACTIVE_HIGH>;
+				linux,default-trigger = "heartbeat";
+			};
+		};
 	};
 };
 
