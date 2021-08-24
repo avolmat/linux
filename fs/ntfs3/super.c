@@ -1805,7 +1805,7 @@ static void ntfs3_kill_sb(struct super_block *sb)
 // clang-format off
 static struct file_system_type ntfs_fs_type = {
 	.owner			= THIS_MODULE,
-	.name			= "ntfs3",
+	.name			= "ntfs",
 	.init_fs_context	= ntfs_init_fs_context,
 	.parameters		= ntfs_fs_parameters,
 	.kill_sb		= ntfs3_kill_sb,
@@ -1929,7 +1929,7 @@ MODULE_INFO(compression, "Read-only lzx/xpress compression included");
 #endif
 
 MODULE_AUTHOR("Konstantin Komarov");
-MODULE_ALIAS_FS("ntfs3");
+MODULE_ALIAS_FS("ntfs");
 
 module_init(init_ntfs_fs);
 module_exit(exit_ntfs_fs);
