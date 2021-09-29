@@ -62,10 +62,6 @@
 			opp-hz = /bits/ 64 <1200000000>;
 			opp-microvolt = <784000>;
 		};
-		opp04 {
-			opp-hz = /bits/ 64 <1500000000>;
-			opp-microvolt = <784000>;
-		};
 	};
 
 	aliases {
