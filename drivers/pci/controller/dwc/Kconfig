@@ -455,7 +455,7 @@ config PCIE_VISCONTI_HOST
 	  This driver supports TMPV7708 SoC.
 
 config PCIE_STI
-	bool "STMicroelectronics PCIe Controller for STi SoCs"
+	tristate "STMicroelectronics PCIe Controller for STi SoCs"
 	depends on ARCH_STI || COMPILE_TEST
 	depends on OF && PCI_MSI
 	select PCIE_DW_HOST
