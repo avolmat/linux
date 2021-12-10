@@ -288,7 +288,7 @@ static const struct dw_pcie_ops dw_pcie_ops = {
 	.start_link = st_pcie_start_link,
 };
 
-static int __init st_pcie_probe(struct platform_device *pdev)
+static int st_pcie_probe(struct platform_device *pdev)
 {
 	struct st_pcie *pcie;
 	struct dw_pcie *dw;
