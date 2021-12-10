@@ -368,6 +368,7 @@ static const struct of_device_id st_pcie_of_match[] = {
 	{ .compatible = "st,stih407-pcie", },
 	{ },
 };
+MODULE_DEVICE_TABLE(of, st_pcie_of_match);
 
 static struct platform_driver st_pcie_driver __refdata = {
 	.probe  = st_pcie_probe,
@@ -376,4 +377,8 @@ static struct platform_driver st_pcie_driver __refdata = {
 		.of_match_table = st_pcie_of_match,
 	},
 };
-builtin_platform_driver(st_pcie_driver);
+module_platform_driver(st_pcie_driver);
+
+MODULE_AUTHOR("Alain Volmat <avolmat@me.com>");
+MODULE_DESCRIPTION("STi PCIe Controller driver");
+MODULE_LICENSE("GPL v2");
