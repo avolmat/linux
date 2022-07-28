@@ -234,6 +234,13 @@
 		mboxes = <&mailbox0 0 0>, <&mailbox3 0 1>, <&mailbox0 0 1>, <&mailbox3 0 0>;
 	};
 
+	sti_sasg_codec: sti-sasg-codec {
+		compatible = "st,stih407-sas-codec";
+		#sound-dai-cells = <1>;
+		status = "disabled";
+		st,syscfg = <&syscfg_core>;
+	};
+
 	delta0 {
 		compatible = "st,st-delta";
 		clock-names = "delta",
@@ -279,13 +286,6 @@
 		syscfg_core: core-syscfg@92b0000 {
 			compatible = "st,stih407-core-syscfg", "syscon";
 			reg = <0x92b0000 0x1000>;
-
-			sti_sasg_codec: sti-sasg-codec {
-				compatible = "st,stih407-sas-codec";
-				#sound-dai-cells = <1>;
-				status = "disabled";
-				st,syscfg = <&syscfg_core>;
-			};
 		};
 
 		syscfg_lpm: lpm-syscfg@94b5100 {
