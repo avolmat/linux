@@ -82,6 +82,12 @@
 		};
 	};
 
+	sti_sasg_codec: sti-sasg-codec {
+		status = "okay";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_spdif_out>;
+	};
+
 	soc {
 		sbc_serial0: serial@9530000 {
 			status = "okay";
@@ -193,14 +199,6 @@
 
 		sti_uni_player3: sti-uni-player@8d85000 {
 			status = "okay";
-		};
-
-		syscfg_core: core-syscfg@92b0000 {
-			sti_sasg_codec: sti-sasg-codec {
-				status = "okay";
-				pinctrl-names = "default";
-				pinctrl-0 = <&pinctrl_spdif_out>;
-			};
 		};
 	};
 };
