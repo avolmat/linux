@@ -775,6 +775,9 @@
 				phys = <&usb2_picophy0>,
 				       <&phy_port2 PHY_TYPE_USB3>;
 				snps,dis_u3_susphy_quirk;
+				snps,usb3_lpm_capable;
+				snps,dis-u1-entry-quirk;
+				snps,dis-u2-entry-quirk;
 			};
 		};
 
