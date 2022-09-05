@@ -120,7 +120,7 @@ static inline u32 bdf_num(int bus, int devfn, int is_root_bus)
 
 static void __iomem *st_pcie_other_map_bus(struct pci_bus *bus, unsigned int devfn, int where)
 {
-	struct pcie_port *pp = bus->sysdata;
+	struct dw_pcie_rp *pp = bus->sysdata;
 	struct dw_pcie *dw = to_dw_pcie_from_pp(pp);
 	u32 bdf;
 
@@ -162,7 +162,7 @@ static void st_pcie_hw_setup(struct dw_pcie *dw)
 	dw_pcie_writel_dbi(dw, TRANSLATION_CONTROL, RC_PASS_ADDR_RANGE);
 }
 
-static int st_pcie_init(struct pcie_port *pp)
+static int st_pcie_init(struct dw_pcie_rp *pp)
 {
 	struct dw_pcie *dw = to_dw_pcie_from_pp(pp);
 	struct st_pcie *pcie = to_st_pcie(dw);
@@ -200,7 +200,7 @@ static int st_pcie_control_ltssm(struct dw_pcie *dw, bool enable)
 				  FIELD_PREP(PCIE_APP_LTSSM_ENABLE, enable));
 }
 
-static int st_pcie_host_init(struct pcie_port *pp)
+static int st_pcie_host_init(struct dw_pcie_rp *pp)
 {
 	struct dw_pcie *dw = to_dw_pcie_from_pp(pp);
 	struct st_pcie *pcie = to_st_pcie(dw);
@@ -293,7 +293,7 @@ static int __init st_pcie_probe(struct platform_device *pdev)
 	struct st_pcie *pcie;
 	struct dw_pcie *dw;
 	struct device_node *np = pdev->dev.of_node;
-	struct pcie_port *pp;
+	struct dw_pcie_rp *pp;
 	int ret;
 
 	pcie = devm_kzalloc(&pdev->dev, sizeof(*pcie), GFP_KERNEL);
