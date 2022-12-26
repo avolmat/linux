@@ -457,7 +457,7 @@ config PCIE_VISCONTI_HOST
 config PCIE_STI
 	bool "STMicroelectronics PCIe Controller for STi SoCs"
 	depends on ARCH_STI || COMPILE_TEST
-	depends on OF && PCI_MSI_IRQ_DOMAIN
+	depends on OF && PCI_MSI
 	select PCIE_DW_HOST
 	help
 	  Enable PCIe controller support on STMicroelectronics STi SoCs.
