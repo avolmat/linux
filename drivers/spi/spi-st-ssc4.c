@@ -183,11 +183,6 @@ static int spi_st_setup(struct spi_device *spi)
 		return -EINVAL;
 	}
 
-	if (!spi_get_csgpiod(spi, 0)) {
-		dev_err(&spi->dev, "no valid gpio assigned\n");
-		return -EINVAL;
-	}
-
 	spi_st_clk = clk_get_rate(spi_st->clk);
 
 	/* Set SSC_BRF */
