@@ -2926,6 +2926,7 @@ L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
 S:	Maintained
 W:	http://www.stlinux.com
 F:	Documentation/devicetree/bindings/i2c/st,i2c.yaml
+F:	Documentation/devicetree/bindings/spi/st,ssc-spi.yaml
 F:	arch/arm/boot/dts/sti*
 F:	arch/arm/mach-sti/
 F:	drivers/ata/ahci_st.c
