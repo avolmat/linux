@@ -15,8 +15,6 @@ properties:
   compatible:
     items:
       - enum:
-          - st,stih415
-          - st,stih416
           - st,stih407
           - st,stih410
           - st,stih418
