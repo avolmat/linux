@@ -1,0 +1,81 @@
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/clock/st/st,clkgen.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: STMicroelectronics STi platform clockgen Clock Controller
+
+maintainers:
+  - Patrice Chotard <patrice.chotard@foss.st.com>
+
+description: |
+  A Clockgen node can contain pll, diviser or multiplexer nodes.
+
+  We will find only the base address of the Clockgen, this base
+  address is common of all subnode.
+
+    clockgen_node {
+      reg = <>;
+
+      pll_node {
+        ...
+      };
+
+      quadfs_node {
+        ...
+      };
+
+      mux_node {
+        ...
+      };
+
+      flexgen_node {
+        ...
+      };
+    ...
+  };
+
+properties:
+  compatible:
+    const: st,clkgen-c32
+
+  reg:
+    maxItems: 1
+
+patternProperties:
+  ".*-pll":
+    description:
+      PLL generating of the input clock for the flexgen
+    type: object
+    $ref: /schemas/clock/st/st,clkgen-pll.yaml#
+
+  "clk-m-a9":
+    description:
+      The A9 clock mux node
+    type: object
+    $ref: /schemas/clock/st/st,clkgen-mux.yaml#
+
+  ".*-quadfs":
+    description:
+      Frequency generators, usually used as input by the flexgen
+    type: object
+    $ref: /schemas/clock/st/st,quadfs.yaml#
+
+  ".*-flexgen":
+    description:
+      The flexgen getting all input clock and generating
+      the child clock via dividers
+    type: object
+    $ref: /schemas/clock/st/st,flexgen.yaml#
+
+required:
+  - compatible
+  - reg
+
+additionalProperties: false
+
+examples:
+  - |
+
+...

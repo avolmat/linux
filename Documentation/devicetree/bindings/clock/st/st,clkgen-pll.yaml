@@ -1,0 +1,58 @@
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/clock/st/st,clkgen-pll.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: STMicroelectronics STi platform clockgen PLL
+
+maintainers:
+  - Patrice Chotard <patrice.chotard@foss.st.com>
+
+description: |
+  This describes the schema of a pll being used as a source for
+  the clockgen.
+
+properties:
+  compatible:
+    enum:
+      - st,clkgen-pll0
+      - st,clkgen-pll0-a0
+      - st,clkgen-pll0-c0
+      - st,clkgen-pll1
+      - st,clkgen-pll1-c0
+      - st,stih407-clkgen-plla9
+      - st,stih418-clkgen-plla9
+
+  clocks:
+    description:
+      Specifies the reference clock(s) from which the output frequency is
+      derived.
+    maxItems: 1
+
+  '#clock-cells':
+    const: 1
+
+  clock-output-names:
+    maxItems: 1
+
+required:
+  - "#clock-cells"
+  - compatible
+  - clocks
+
+additionalProperties: false
+
+examples:
+  - |
+    clockgen-a9@92b0000 {
+        compatible = "st,clkgen-c32";
+        reg = <0x92b0000 0x10000>;
+        clockgen_a9_pll: clockgen-a9-pll {
+            #clock-cells = <1>;
+            compatible = "st,stih407-clkgen-plla9";
+            clocks = <&clk_sysin>;
+        };
+    };
+
+...
