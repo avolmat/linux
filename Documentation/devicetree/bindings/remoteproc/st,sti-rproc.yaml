@@ -1,0 +1,101 @@
+# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: "http://devicetree.org/schemas/remoteproc/st,sti-rproc.yaml#"
+$schema: "http://devicetree.org/meta-schemas/core.yaml#"
+
+title: STMicroelectronics STi remote processor controller
+
+description:
+  This binding provides support for adjunct processors found on ST SoCs.
+
+  Co-processors can be controlled from the bootloader or the primary OS. If
+  the bootloader starts a co-processor, the primary OS must detect its state
+  and act accordingly.
+
+maintainers:
+  - Patrice Chotard <patrice.chotard@foss.st.com>
+
+properties:
+  compatible:
+    enum:
+      - st,st231-rproc
+      - st,st40-rproc
+
+  memory-region:
+    description:
+      List of phandles to the reserved memory regions associated with the
+      remoteproc device. This is variable and describes the memories shared with
+      the remote processor (e.g. remoteproc firmware and carveouts, rpmsg
+      vrings, ...).
+      (see ../reserved-memory/reserved-memory.txt)
+
+  resets:
+    maxItems: 1
+
+  reset-names:
+    maxItems: 1
+
+  st,syscfg:
+    description:
+      System configuration register which holds the boot vector for the co-processor
+    $ref: "/schemas/types.yaml#/definitions/phandle-array"
+    items:
+      - items:
+          - description: Phandle of syscon block
+          - description: Boot vector register offset
+
+  clocks:
+    maxItems: 1
+
+  clock-frequency:
+    description:
+      Frequency of the processing clock of the remote processor
+    $ref: "/schemas/types.yaml#/definitions/uint32"
+
+  "#mbox-cells":
+    const: 1
+
+  mboxes:
+    maxItems: 4
+
+  mbox-names:
+    items:
+      - const: vq0_rx
+      - const: vq0_tx
+      - const: vq1_rx
+      - const: vq1_tx
+
+required:
+  - compatible
+  - memory-region
+  - resets
+  - reset-names
+  - st,syscfg
+  - clocks
+  - clock-frequency
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+    #include <dt-bindings/clock/stih407-clks.h>
+    #include <dt-bindings/reset/stih407-resets.h>
+    audio_reserved: rproc@42000000 {
+      compatible = "shared-dma-pool";
+        reg = <0x42000000 0x01000000>;
+        no-map;
+    };
+
+    st231-audio {
+      compatible = "st,st231-rproc";
+      memory-region = <&audio_reserved>;
+      resets = <&softreset STIH407_ST231_AUD_SOFTRESET>;
+      reset-names = "sw_reset";
+      clocks = <&clk_s_c0_flexgen CLK_ST231_AUD_0>;
+      clock-frequency = <600000000>;
+      st,syscfg	= <&syscfg_core 0x228>;
+    };
+
+...
