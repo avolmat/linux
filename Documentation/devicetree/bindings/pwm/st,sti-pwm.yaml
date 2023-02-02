@@ -1,0 +1,73 @@
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/pwm/st,sti-pwm.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: STMicroelectronics STi PWM controller
+
+maintainers:
+  - Patrice Chotard <patrice.chotard@foss.st.com>
+
+allOf:
+  - $ref: pwm.yaml#
+
+properties:
+  compatible:
+    const: st,sti-pwm
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  pinctrl-names:
+    const: default
+
+  pinctrl-0:
+    description: Configuration for the default state.
+
+  clock-names:
+    const: pwm
+
+  clocks:
+    $ref: "/schemas/types.yaml#/definitions/phandle"
+
+  st,pwm-num-chan:
+    $ref: "/schemas/types.yaml#/definitions/uint32"
+    description: Number of available PWM channels.
+
+  st,capture-num-chan:
+    $ref: "/schemas/types.yaml#/definitions/uint32"
+    description: Number of available Capture channels.
+
+  "#pwm-cells":
+    const: 2
+
+required:
+  - compatible
+  - reg
+  - interrupts
+  - clock-names
+  - clocks
+
+additionalProperties: false
+
+examples:
+  - |
+        pwm1: pwm@9510000 {
+            compatible = "st,sti-pwm";
+            #pwm-cells = <2>;
+            reg = <0x9510000 0x68>;
+            interrupts = <GIC_SPI 131 IRQ_TYPE_LEVEL_HIGH>;
+            pinctrl-names = "default";
+            pinctrl-0 = <&pinctrl_pwm1_chan0_default
+                     &pinctrl_pwm1_chan1_default
+                     &pinctrl_pwm1_chan2_default
+                     &pinctrl_pwm1_chan3_default>;
+            clock-names = "pwm";
+            clocks = <&clk_sysin>;
+            st,pwm-num-chan = <4>;
+        };
+...
