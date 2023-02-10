@@ -16,8 +16,8 @@
 		compatible = "st,stih407-usb2-phy";
 		#phy-cells = <0>;
 		st,syscfg = <&syscfg_core 0xf8 0xf4>;
-		resets = <&softreset STIH407_PICOPHY_SOFTRESET>,
-			 <&picophyreset STIH407_PICOPHY0_RESET>;
+		resets = <&core_5132_reset STIH407_PICOPHY_SOFTRESET>,
+			 <&core_5061_reset STIH407_PICOPHY0_RESET>;
 		reset-names = "global", "port";
 
 		status = "disabled";
@@ -27,8 +27,8 @@
 		compatible = "st,stih407-usb2-phy";
 		#phy-cells = <0>;
 		st,syscfg = <&syscfg_core 0xfc 0xf4>;
-		resets = <&softreset STIH407_PICOPHY_SOFTRESET>,
-			 <&picophyreset STIH407_PICOPHY1_RESET>;
+		resets = <&core_5132_reset STIH407_PICOPHY_SOFTRESET>,
+			 <&core_5061_reset STIH407_PICOPHY1_RESET>;
 		reset-names = "global", "port";
 
 		status = "disabled";
@@ -42,7 +42,7 @@
 			clocks = <&clk_s_c0_flexgen CLK_TX_ICN_DISP_0>,
 				 <&clk_s_c0_flexgen CLK_RX_ICN_DISP_0>;
 			resets = <&powerdown STIH407_USB2_PORT0_POWERDOWN>,
-				 <&softreset STIH407_USB2_PORT0_SOFTRESET>;
+				 <&core_5132_reset STIH407_USB2_PORT0_SOFTRESET>;
 			reset-names = "power", "softreset";
 			phys = <&usb2_picophy1>;
 			phy-names = "usb";
@@ -59,7 +59,7 @@
 			clocks = <&clk_s_c0_flexgen CLK_TX_ICN_DISP_0>,
 				 <&clk_s_c0_flexgen CLK_RX_ICN_DISP_0>;
 			resets = <&powerdown STIH407_USB2_PORT0_POWERDOWN>,
-				 <&softreset STIH407_USB2_PORT0_SOFTRESET>;
+				 <&core_5132_reset STIH407_USB2_PORT0_SOFTRESET>;
 			reset-names = "power", "softreset";
 			phys = <&usb2_picophy1>;
 			phy-names = "usb";
@@ -74,7 +74,7 @@
 			clocks = <&clk_s_c0_flexgen CLK_TX_ICN_DISP_0>,
 				 <&clk_s_c0_flexgen CLK_RX_ICN_DISP_0>;
 			resets = <&powerdown STIH407_USB2_PORT1_POWERDOWN>,
-				 <&softreset STIH407_USB2_PORT1_SOFTRESET>;
+				 <&core_5132_reset STIH407_USB2_PORT1_SOFTRESET>;
 			reset-names = "power", "softreset";
 			phys = <&usb2_picophy2>;
 			phy-names = "usb";
@@ -91,7 +91,7 @@
 			clocks = <&clk_s_c0_flexgen CLK_TX_ICN_DISP_0>,
 				 <&clk_s_c0_flexgen CLK_RX_ICN_DISP_0>;
 			resets = <&powerdown STIH407_USB2_PORT1_POWERDOWN>,
-				 <&softreset STIH407_USB2_PORT1_SOFTRESET>;
+				 <&core_5132_reset STIH407_USB2_PORT1_SOFTRESET>;
 			reset-names = "power", "softreset";
 			phys = <&usb2_picophy2>;
 			phy-names = "usb";
@@ -164,8 +164,8 @@
 					 <&clk_s_d2_quadfs 1>;
 
 				reset-names = "compo-main", "compo-aux";
-				resets = <&softreset STIH407_COMPO_SOFTRESET>,
-					 <&softreset STIH407_COMPO_SOFTRESET>;
+				resets = <&core_5131_reset STIH407_COMPO_SOFTRESET>,
+					 <&core_5131_reset STIH407_COMPO_SOFTRESET>;
 				st,vtg = <&vtg_main>, <&vtg_aux>;
 			};
 
@@ -174,7 +174,7 @@
 				reg = <0x8d08000 0x1000>;
 				reg-names = "tvout-reg";
 				reset-names = "tvout";
-				resets = <&softreset STIH407_HDTVOUT_SOFTRESET>;
+				resets = <&core_5131_reset STIH407_HDTVOUT_SOFTRESET>;
 				#address-cells = <1>;
 				#size-cells = <1>;
 				assigned-clocks = <&clk_s_d2_flexgen CLK_PIX_HDMI>,
@@ -215,7 +215,7 @@
 
 				hdmi,hpd-gpio = <&pio5 3 GPIO_ACTIVE_LOW>;
 				reset-names = "hdmi";
-				resets = <&softreset STIH407_HDMI_TX_PHY_SOFTRESET>;
+				resets = <&core_5131_reset STIH407_HDMI_TX_PHY_SOFTRESET>;
 				ddc = <&hdmiddc>;
 			};
 
@@ -241,7 +241,7 @@
 				clocks = <&clk_s_c0_flexgen CLK_MAIN_DISP>,
 					 <&clk_s_d2_flexgen CLK_PIX_MAIN_DISP>;
 				reset-names = "hqvdp";
-				resets = <&softreset STIH407_HDQVDP_SOFTRESET>;
+				resets = <&core_5131_reset STIH407_HDQVDP_SOFTRESET>;
 				st,vtg = <&vtg_main>;
 			};
 		};

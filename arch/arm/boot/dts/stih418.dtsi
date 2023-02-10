@@ -30,8 +30,8 @@
 		compatible = "st,stih407-usb2-phy";
 		#phy-cells = <0>;
 		st,syscfg = <&syscfg_core 0xf8 0xf4>;
-		resets = <&softreset STIH407_PICOPHY_SOFTRESET>,
-			 <&picophyreset STIH407_PICOPHY0_RESET>;
+		resets = <&core_5132_reset STIH407_PICOPHY_SOFTRESET>,
+			 <&core_5061_reset STIH407_PICOPHY0_RESET>;
 		reset-names = "global", "port";
 	};
 
@@ -39,8 +39,8 @@
 		compatible = "st,stih407-usb2-phy";
 		#phy-cells = <0>;
 		st,syscfg = <&syscfg_core 0xfc 0xf4>;
-		resets = <&softreset STIH407_PICOPHY_SOFTRESET>,
-			 <&picophyreset STIH407_PICOPHY1_RESET>;
+		resets = <&core_5132_reset STIH407_PICOPHY_SOFTRESET>,
+			 <&core_5061_reset STIH407_PICOPHY1_RESET>;
 		reset-names = "global", "port";
 	};
 
@@ -55,7 +55,7 @@
 			interrupts = <GIC_SPI 180 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&clk_s_c0_flexgen CLK_TX_ICN_DISP_0>;
 			resets = <&powerdown STIH407_USB2_PORT0_POWERDOWN>,
-				 <&softreset STIH407_USB2_PORT0_SOFTRESET>;
+				 <&core_5132_reset STIH407_USB2_PORT0_SOFTRESET>;
 			reset-names = "power", "softreset";
 			phys = <&usb2_picophy1>;
 			phy-names = "usb";
@@ -69,7 +69,7 @@
 			pinctrl-0 = <&pinctrl_usb0>;
 			clocks = <&clk_s_c0_flexgen CLK_TX_ICN_DISP_0>;
 			resets = <&powerdown STIH407_USB2_PORT0_POWERDOWN>,
-				 <&softreset STIH407_USB2_PORT0_SOFTRESET>;
+				 <&core_5132_reset STIH407_USB2_PORT0_SOFTRESET>;
 			reset-names = "power", "softreset";
 			phys = <&usb2_picophy1>;
 			phy-names = "usb";
@@ -81,7 +81,7 @@
 			interrupts = <GIC_SPI 181 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&clk_s_c0_flexgen CLK_TX_ICN_DISP_0>;
 			resets = <&powerdown STIH407_USB2_PORT1_POWERDOWN>,
-				 <&softreset STIH407_USB2_PORT1_SOFTRESET>;
+				 <&core_5132_reset STIH407_USB2_PORT1_SOFTRESET>;
 			reset-names = "power", "softreset";
 			phys = <&usb2_picophy2>;
 			phy-names = "usb";
@@ -95,7 +95,7 @@
 			pinctrl-0 = <&pinctrl_usb1>;
 			clocks = <&clk_s_c0_flexgen CLK_TX_ICN_DISP_0>;
 			resets = <&powerdown STIH407_USB2_PORT1_POWERDOWN>,
-				 <&softreset STIH407_USB2_PORT1_SOFTRESET>;
+				 <&core_5132_reset STIH407_USB2_PORT1_SOFTRESET>;
 			reset-names = "power", "softreset";
 			phys = <&usb2_picophy2>;
 			phy-names = "usb";

@@ -131,11 +131,6 @@
 		#reset-cells = <1>;
 	};
 
-	picophyreset: picophyreset-controller {
-		compatible = "st,stih407-picophyreset";
-		#reset-cells = <1>;
-	};
-
 	irq-syscfg {
 		compatible = "st,stih407-irq-syscfg";
 		st,syscfg = <&syscfg_core>;
@@ -149,8 +144,8 @@
 		compatible = "st,stih407-usb2-phy";
 		#phy-cells = <0>;
 		st,syscfg = <&syscfg_core 0x100 0xf4>;
-		resets = <&softreset STIH407_PICOPHY_SOFTRESET>,
-			 <&picophyreset STIH407_PICOPHY2_RESET>;
+		resets = <&core_5132_reset STIH407_PICOPHY_SOFTRESET>,
+			 <&core_5061_reset STIH407_PICOPHY2_RESET>;
 		reset-names = "global", "port";
 	};
 
@@ -173,7 +168,7 @@
 			#phy-cells = <1>;
 
 			reset-names = "miphy-sw-rst";
-			resets = <&softreset STIH407_MIPHY0_SOFTRESET>;
+			resets = <&core_5132_reset STIH407_MIPHY0_SOFTRESET>;
 		};
 
 		phy_port1: port@9b2a000 {
@@ -189,7 +184,7 @@
 			#phy-cells = <1>;
 
 			reset-names = "miphy-sw-rst";
-			resets = <&softreset STIH407_MIPHY1_SOFTRESET>;
+			resets = <&core_5132_reset STIH407_MIPHY1_SOFTRESET>;
 		};
 
 		phy_port2: port@8f95000 {
@@ -203,14 +198,14 @@
 			#phy-cells = <1>;
 
 			reset-names = "miphy-sw-rst";
-			resets = <&softreset STIH407_MIPHY2_SOFTRESET>;
+			resets = <&core_5132_reset STIH407_MIPHY2_SOFTRESET>;
 		};
 	};
 
 	st231_gp0: st231-gp0 {
 		compatible = "st,st231-rproc";
 		memory-region = <&gp0_reserved>;
-		resets = <&softreset STIH407_ST231_GP0_SOFTRESET>;
+		resets = <&core_5131_reset STIH407_ST231_GP0_SOFTRESET>;
 		reset-names = "sw_reset";
 		clocks = <&clk_s_c0_flexgen CLK_ST231_GP_0>;
 		clock-frequency = <600000000>;
@@ -223,7 +218,7 @@
 	st231_delta: st231-delta {
 		compatible = "st,st231-rproc";
 		memory-region = <&delta_reserved>;
-		resets = <&softreset STIH407_ST231_DMU_SOFTRESET>;
+		resets = <&core_5131_reset STIH407_ST231_DMU_SOFTRESET>;
 		reset-names = "sw_reset";
 		clocks = <&clk_s_c0_flexgen CLK_ST231_DMU>;
 		clock-frequency = <600000000>;
@@ -285,6 +280,31 @@
 		syscfg_core: core-syscfg@92b0000 {
 			compatible = "st,stih407-core-syscfg", "syscon";
 			reg = <0x92b0000 0x1000>;
+		};
+
+		/* Reset syscfg registers */
+		core_5061_reset: reset@92b00f4 {
+			compatible = "st,sti-high-reset";
+			reg = <0x92b00f4 0x4>;
+			#reset-cells = <1>;
+		};
+
+		core_5128_reset: reset@92b0200 {
+			compatible = "st,sti-low-reset";
+			reg = <0x92b0200 0x4>;
+			#reset-cells = <1>;
+		};
+
+		core_5131_reset: reset@92b020c {
+			compatible = "st,sti-low-reset";
+			reg = <0x92b020c 0x4>;
+			#reset-cells = <1>;
+		};
+
+		core_5132_reset: reset@92b0210 {
+			compatible = "st,sti-low-reset";
+			reg = <0x92b0210 0x4>;
+			#reset-cells = <1>;
 		};
 
 		syscfg_lpm: lpm-syscfg@94b5100 {
@@ -622,7 +642,7 @@
 			clock-names = "mmc", "icn";
 			clocks = <&clk_s_c0_flexgen CLK_MMC_1>,
 				 <&clk_s_c0_flexgen CLK_RX_ICN_HVA>;
-			resets = <&softreset STIH407_MMC1_SOFTRESET>;
+			resets = <&core_5132_reset STIH407_MMC1_SOFTRESET>;
 			bus-width = <4>;
 		};
 
@@ -671,8 +691,8 @@
 			phy-names = "ahci_phy";
 
 			resets = <&powerdown STIH407_SATA0_POWERDOWN>,
-				 <&softreset STIH407_SATA0_SOFTRESET>,
-				 <&softreset STIH407_SATA0_PWR_SOFTRESET>;
+				 <&core_5132_reset STIH407_SATA0_SOFTRESET>,
+				 <&core_5132_reset STIH407_SATA0_PWR_SOFTRESET>;
 			reset-names = "pwr-dwn", "sw-rst", "pwr-rst";
 
 			clock-names = "ahci_clk";
@@ -694,8 +714,8 @@
 			phy-names = "ahci_phy";
 
 			resets = <&powerdown STIH407_SATA1_POWERDOWN>,
-				 <&softreset STIH407_SATA1_SOFTRESET>,
-				 <&softreset STIH407_SATA1_PWR_SOFTRESET>;
+				 <&core_5132_reset STIH407_SATA1_SOFTRESET>,
+				 <&core_5132_reset STIH407_SATA1_PWR_SOFTRESET>;
 			reset-names = "pwr-dwn",
 				      "sw-rst",
 				      "pwr-rst";
@@ -715,7 +735,7 @@
 			reg-names = "reg-glue", "syscfg-reg";
 			st,syscfg = <&syscfg_core>;
 			resets = <&powerdown STIH407_USB3_POWERDOWN>,
-				 <&softreset STIH407_MIPHY2_SOFTRESET>;
+				 <&core_5132_reset STIH407_MIPHY2_SOFTRESET>;
 			reset-names = "powerdown", "softreset";
 			#address-cells = <1>;
 			#size-cells = <1>;

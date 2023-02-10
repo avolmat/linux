@@ -48,14 +48,7 @@ static const struct syscfg_reset_channel_data stih407_powerdowns[] = {
 };
 
 /* Reset Generator control 0/1 */
-#define SYSCFG_5128	0x200
-#define SYSCFG_5131	0x20c
-#define SYSCFG_5132	0x210
-
 #define LPM_SYSCFG_1	0x4	/* Softreset IRB & SBC UART */
-
-#define STIH407_SRST_CORE(_reg, _bit) \
-	_SYSCFG_RST_CH_NO_ACK(stih407_core, _reg, _bit)
 
 #define STIH407_SRST_SBC(_reg, _bit) \
 	_SYSCFG_RST_CH_NO_ACK(stih407_sbc_reg, _reg, _bit)
@@ -65,47 +58,9 @@ static const struct syscfg_reset_channel_data stih407_powerdowns[] = {
 
 static const struct syscfg_reset_channel_data stih407_softresets[] = {
 	[STIH407_ETH1_SOFTRESET] = STIH407_SRST_SBC(SYSCFG_4002, 4),
-	[STIH407_MMC1_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5132, 3),
-	[STIH407_USB2_PORT0_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5132, 28),
-	[STIH407_USB2_PORT1_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5132, 29),
-	[STIH407_PICOPHY_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5132, 30),
 	[STIH407_IRB_SOFTRESET] = STIH407_SRST_LPM(LPM_SYSCFG_1, 6),
-	[STIH407_PCIE0_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5132, 6),
-	[STIH407_PCIE1_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5132, 15),
-	[STIH407_SATA0_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5132, 7),
-	[STIH407_SATA1_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5132, 16),
-	[STIH407_MIPHY0_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5132, 4),
-	[STIH407_MIPHY1_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5132, 13),
-	[STIH407_MIPHY2_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5132, 22),
-	[STIH407_SATA0_PWR_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5132, 5),
-	[STIH407_SATA1_PWR_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5132, 14),
-	[STIH407_DELTA_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5131, 3),
-	[STIH407_BLITTER_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5131, 10),
-	[STIH407_HDTVOUT_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5131, 11),
-	[STIH407_HDQVDP_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5131, 12),
-	[STIH407_VDP_AUX_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5131, 14),
-	[STIH407_COMPO_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5131, 15),
-	[STIH407_HDMI_TX_PHY_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5131, 21),
-	[STIH407_JPEG_DEC_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5131, 23),
-	[STIH407_VP8_DEC_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5131, 24),
-	[STIH407_GPU_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5131, 30),
-	[STIH407_HVA_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5132, 0),
-	[STIH407_ERAM_HVA_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5132, 1),
 	[STIH407_LPM_SOFTRESET] = STIH407_SRST_SBC(SYSCFG_4002, 2),
 	[STIH407_KEYSCAN_SOFTRESET] = STIH407_SRST_LPM(LPM_SYSCFG_1, 8),
-	[STIH407_ST231_AUD_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5131, 26),
-	[STIH407_ST231_DMU_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5131, 27),
-	[STIH407_ST231_GP0_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5131, 28),
-	[STIH407_ST231_GP1_SOFTRESET] = STIH407_SRST_CORE(SYSCFG_5128, 2),
-};
-
-/* PicoPHY reset/control */
-#define SYSCFG_5061	0x0f4
-
-static const struct syscfg_reset_channel_data stih407_picophyresets[] = {
-	[STIH407_PICOPHY0_RESET] = STIH407_SRST_CORE(SYSCFG_5061, 5),
-	[STIH407_PICOPHY1_RESET] = STIH407_SRST_CORE(SYSCFG_5061, 6),
-	[STIH407_PICOPHY2_RESET] = STIH407_SRST_CORE(SYSCFG_5061, 7),
 };
 
 static const struct syscfg_reset_controller_data stih407_powerdown_controller = {
@@ -121,12 +76,6 @@ static const struct syscfg_reset_controller_data stih407_softreset_controller = 
 	.channels = stih407_softresets,
 };
 
-static const struct syscfg_reset_controller_data stih407_picophyreset_controller = {
-	.wait_for_ack = false,
-	.nr_channels = ARRAY_SIZE(stih407_picophyresets),
-	.channels = stih407_picophyresets,
-};
-
 static const struct of_device_id stih407_reset_match[] = {
 	{
 		.compatible = "st,stih407-powerdown",
@@ -135,10 +84,6 @@ static const struct of_device_id stih407_reset_match[] = {
 	{
 		.compatible = "st,stih407-softreset",
 		.data = &stih407_softreset_controller,
-	},
-	{
-		.compatible = "st,stih407-picophyreset",
-		.data = &stih407_picophyreset_controller,
 	},
 	{ /* sentinel */ },
 };
