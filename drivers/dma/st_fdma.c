@@ -169,7 +169,6 @@ static struct dma_chan *st_fdma_of_xlate(struct of_phandle_args *dma_spec,
 	struct st_fdma_dev *fdev = ofdma->of_dma_data;
 	struct dma_chan *chan;
 	struct st_fdma_chan *fchan;
-	int ret;
 
 	if (dma_spec->args_count < 1)
 		return ERR_PTR(-EINVAL);
@@ -177,15 +176,12 @@ static struct dma_chan *st_fdma_of_xlate(struct of_phandle_args *dma_spec,
 	if (fdev->dma_device.dev->of_node != dma_spec->np)
 		return ERR_PTR(-EINVAL);
 
-	ret = rproc_boot(fdev->slim_rproc->rproc);
-	if (ret == -ENOENT)
+	if (fdev->slim_rproc->rproc->state != RPROC_RUNNING)
 		return ERR_PTR(-EPROBE_DEFER);
-	else if (ret)
-		return ERR_PTR(ret);
 
 	chan = dma_get_any_slave_channel(&fdev->dma_device);
 	if (!chan)
-		goto err_chan;
+		return chan;
 
 	fchan = to_st_fdma_chan(chan);
 
@@ -205,21 +201,14 @@ static struct dma_chan *st_fdma_of_xlate(struct of_phandle_args *dma_spec,
 		fchan->dreq_line = 0;
 	} else {
 		fchan->dreq_line = st_fdma_dreq_get(fchan);
-		if (IS_ERR_VALUE(fchan->dreq_line)) {
-			chan = ERR_PTR(fchan->dreq_line);
-			goto err_chan;
-		}
+		if (IS_ERR_VALUE(fchan->dreq_line))
+			return ERR_PTR(fchan->dreq_line);
 	}
 
 	dev_dbg(fdev->dev, "xlate req_line:%d type:%d req_ctrl:%#lx\n",
 		fchan->cfg.req_line, fchan->cfg.type, fchan->cfg.req_ctrl);
 
 	return chan;
-
-err_chan:
-	rproc_shutdown(fdev->slim_rproc->rproc);
-	return chan;
-
 }
 
 static void st_fdma_free_desc(struct virt_dma_desc *vdesc)
@@ -287,7 +276,6 @@ static int st_fdma_alloc_chan_res(struct dma_chan *chan)
 static void st_fdma_free_chan_res(struct dma_chan *chan)
 {
 	struct st_fdma_chan *fchan = to_st_fdma_chan(chan);
-	struct rproc *rproc = fchan->fdev->slim_rproc->rproc;
 	unsigned long flags;
 
 	dev_dbg(fchan->fdev->dev, "%s: freeing chan:%d\n",
@@ -303,8 +291,6 @@ static void st_fdma_free_chan_res(struct dma_chan *chan)
 	dma_pool_destroy(fchan->node_pool);
 	fchan->node_pool = NULL;
 	memset(&fchan->cfg, 0, sizeof(struct st_fdma_cfg));
-
-	rproc_shutdown(rproc);
 }
 
 static struct dma_async_tx_descriptor *st_fdma_prep_dma_memcpy(
