@@ -809,6 +809,7 @@ static int st_fdma_probe(struct platform_device *pdev)
 	fdev->dma_device.dst_addr_widths = FDMA_DMA_BUSWIDTHS;
 	fdev->dma_device.directions = BIT(DMA_DEV_TO_MEM) | BIT(DMA_MEM_TO_DEV);
 	fdev->dma_device.residue_granularity = DMA_RESIDUE_GRANULARITY_BURST;
+	fdev->dma_device.copy_align = DMAENGINE_ALIGN_128_BYTES;
 
 	ret = dmaenginem_async_device_register(&fdev->dma_device);
 	if (ret) {
