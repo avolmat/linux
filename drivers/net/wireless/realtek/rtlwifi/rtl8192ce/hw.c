@@ -1271,24 +1271,31 @@ void rtl92ce_set_qos(struct ieee80211_hw *hw, int aci)
 	}
 }
 
+DEFINE_SPINLOCK(rtl92ce_lock);
 void rtl92ce_enable_interrupt(struct ieee80211_hw *hw)
 {
+	unsigned long flags;
 	struct rtl_priv *rtlpriv = rtl_priv(hw);
 	struct rtl_pci *rtlpci = rtl_pcidev(rtl_pcipriv(hw));
 
+	spin_lock_irqsave(&rtl92ce_lock, flags);
 	rtl_write_dword(rtlpriv, REG_HIMR, rtlpci->irq_mask[0] & 0xFFFFFFFF);
 	rtl_write_dword(rtlpriv, REG_HIMRE, rtlpci->irq_mask[1] & 0xFFFFFFFF);
 	rtlpci->irq_enabled = true;
+	spin_unlock_irqrestore(&rtl92ce_lock, flags);
 }
 
 void rtl92ce_disable_interrupt(struct ieee80211_hw *hw)
 {
+	unsigned long flags;
 	struct rtl_priv *rtlpriv = rtl_priv(hw);
 	struct rtl_pci *rtlpci = rtl_pcidev(rtl_pcipriv(hw));
 
+	spin_lock_irqsave(&rtl92ce_lock, flags);
 	rtl_write_dword(rtlpriv, REG_HIMR, IMR8190_DISABLED);
 	rtl_write_dword(rtlpriv, REG_HIMRE, IMR8190_DISABLED);
 	rtlpci->irq_enabled = false;
+	spin_unlock_irqrestore(&rtl92ce_lock, flags);
 }
 
 static void _rtl92ce_poweroff_adapter(struct ieee80211_hw *hw)
