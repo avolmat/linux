@@ -157,6 +157,9 @@ static void rtl_op_stop(struct ieee80211_hw *hw)
 
 	rtlpriv->cfg->ops->get_hw_reg(hw, HAL_DEF_WOWLAN,
 				      (u8 *)(&support_remote_wakeup));
+
+	mutex_lock(&rtlpriv->locks.conf_mutex);
+
 	/* here is must, because adhoc do stop and start,
 	 * but stop with RFOFF may cause something wrong,
 	 * like adhoc TP
@@ -164,7 +167,6 @@ static void rtl_op_stop(struct ieee80211_hw *hw)
 	if (unlikely(ppsc->rfpwr_state == ERFOFF))
 		rtl_ips_nic_on(hw);
 
-	mutex_lock(&rtlpriv->locks.conf_mutex);
 	/* if wowlan supported, DON'T clear connected info */
 	if (!(support_remote_wakeup &&
 	      rtlhal->enter_pnp_sleep)) {
