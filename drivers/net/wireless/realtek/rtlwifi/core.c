@@ -212,6 +212,7 @@ static int rtl_op_add_interface(struct ieee80211_hw *hw,
 {
 	struct rtl_priv *rtlpriv = rtl_priv(hw);
 	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
+	unsigned long flags;
 	int err = 0;
 	u8 retry_limit = 0x30;
 
@@ -235,8 +236,10 @@ static int rtl_op_add_interface(struct ieee80211_hw *hw,
 			rtl_dbg(rtlpriv, COMP_MAC80211, DBG_LOUD,
 				"NL80211_IFTYPE_STATION\n");
 			mac->beacon_enabled = 0;
+			spin_lock_irqsave(&rtlpriv->locks.irq_th_lock, flags);
 			rtlpriv->cfg->ops->update_interrupt_mask(hw, 0,
 					rtlpriv->cfg->maps[RTL_IBSS_INT_MASKS]);
+			spin_unlock_irqrestore(&rtlpriv->locks.irq_th_lock, flags);
 		}
 		break;
 	case NL80211_IFTYPE_ADHOC:
@@ -244,7 +247,9 @@ static int rtl_op_add_interface(struct ieee80211_hw *hw,
 			"NL80211_IFTYPE_ADHOC\n");
 
 		mac->link_state = MAC80211_LINKED;
+		spin_lock_irqsave(&rtlpriv->locks.irq_th_lock, flags);
 		rtlpriv->cfg->ops->set_bcn_reg(hw);
+		spin_unlock_irqrestore(&rtlpriv->locks.irq_th_lock, flags);
 		if (rtlpriv->rtlhal.current_bandtype == BAND_ON_2_4G)
 			mac->basic_rates = 0xfff;
 		else
@@ -262,7 +267,9 @@ static int rtl_op_add_interface(struct ieee80211_hw *hw,
 			"NL80211_IFTYPE_AP\n");
 
 		mac->link_state = MAC80211_LINKED;
+		spin_lock_irqsave(&rtlpriv->locks.irq_th_lock, flags);
 		rtlpriv->cfg->ops->set_bcn_reg(hw);
+		spin_unlock_irqrestore(&rtlpriv->locks.irq_th_lock, flags);
 		if (rtlpriv->rtlhal.current_bandtype == BAND_ON_2_4G)
 			mac->basic_rates = 0xfff;
 		else
@@ -321,6 +328,7 @@ static void rtl_op_remove_interface(struct ieee80211_hw *hw,
 {
 	struct rtl_priv *rtlpriv = rtl_priv(hw);
 	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
+	unsigned long flags;
 
 	mutex_lock(&rtlpriv->locks.conf_mutex);
 
@@ -330,8 +338,10 @@ static void rtl_op_remove_interface(struct ieee80211_hw *hw,
 	    vif->type == NL80211_IFTYPE_MESH_POINT) {
 		if (mac->beacon_enabled == 1) {
 			mac->beacon_enabled = 0;
+			spin_lock_irqsave(&rtlpriv->locks.irq_th_lock, flags);
 			rtlpriv->cfg->ops->update_interrupt_mask(hw, 0,
 					rtlpriv->cfg->maps[RTL_IBSS_INT_MASKS]);
+			spin_unlock_irqrestore(&rtlpriv->locks.irq_th_lock, flags);
 		}
 	}
 
@@ -1025,6 +1035,7 @@ static void rtl_op_bss_info_changed(struct ieee80211_hw *hw,
 	struct rtl_hal *rtlhal = rtl_hal(rtlpriv);
 	struct rtl_mac *mac = rtl_mac(rtl_priv(hw));
 	struct rtl_ps_ctl *ppsc = rtl_psc(rtl_priv(hw));
+	unsigned long flags;
 
 	mutex_lock(&rtlpriv->locks.conf_mutex);
 	if (vif->type == NL80211_IFTYPE_ADHOC ||
@@ -1040,10 +1051,11 @@ static void rtl_op_bss_info_changed(struct ieee80211_hw *hw,
 				/*start hw beacon interrupt. */
 				/*rtlpriv->cfg->ops->set_bcn_reg(hw); */
 				mac->beacon_enabled = 1;
+				spin_lock_irqsave(&rtlpriv->locks.irq_th_lock, flags);
 				rtlpriv->cfg->ops->update_interrupt_mask(hw,
 						rtlpriv->cfg->maps
 						[RTL_IBSS_INT_MASKS], 0);
-
+				spin_unlock_irqrestore(&rtlpriv->locks.irq_th_lock, flags);
 				if (rtlpriv->cfg->ops->linked_set_reg)
 					rtlpriv->cfg->ops->linked_set_reg(hw);
 				send_beacon_frame(hw, vif);
@@ -1056,16 +1068,20 @@ static void rtl_op_bss_info_changed(struct ieee80211_hw *hw,
 					"ADHOC DISABLE BEACON\n");
 
 				mac->beacon_enabled = 0;
+				spin_lock_irqsave(&rtlpriv->locks.irq_th_lock, flags);
 				rtlpriv->cfg->ops->update_interrupt_mask(hw, 0,
 						rtlpriv->cfg->maps
 						[RTL_IBSS_INT_MASKS]);
+				spin_unlock_irqrestore(&rtlpriv->locks.irq_th_lock, flags);
 			}
 		}
 		if (changed & BSS_CHANGED_BEACON_INT) {
 			rtl_dbg(rtlpriv, COMP_BEACON, DBG_TRACE,
 				"BSS_CHANGED_BEACON_INT\n");
 			mac->beacon_interval = bss_conf->beacon_int;
+			spin_lock_irqsave(&rtlpriv->locks.irq_th_lock, flags);
 			rtlpriv->cfg->ops->set_bcn_intv(hw);
+			spin_unlock_irqrestore(&rtlpriv->locks.irq_th_lock, flags);
 		}
 	}
 
