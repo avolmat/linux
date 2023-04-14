@@ -1723,6 +1723,7 @@ static int rtl_pci_start(struct ieee80211_hw *hw)
 	struct rtl_ps_ctl *ppsc = rtl_psc(rtl_priv(hw));
 	struct rtl_mac *rtlmac = rtl_mac(rtl_priv(hw));
 	struct rtl_btc_ops *btc_ops = rtlpriv->btcoexist.btc_ops;
+	unsigned long flags;
 
 	int err;
 
@@ -1749,7 +1750,9 @@ static int rtl_pci_start(struct ieee80211_hw *hw)
 	rtlpriv->cfg->ops->set_hw_reg(hw, HW_VAR_RETRY_LIMIT,
 			&rtlmac->retry_long);
 
+	spin_lock_irqsave(&rtlpriv->locks.irq_th_lock, flags);
 	rtlpriv->cfg->ops->enable_interrupt(hw);
+	spin_unlock_irqrestore(&rtlpriv->locks.irq_th_lock, flags);
 	rtl_dbg(rtlpriv, COMP_INIT, DBG_LOUD, "enable_interrupt OK\n");
 
 	rtl_init_rx_config(hw);
@@ -1786,7 +1789,9 @@ static void rtl_pci_stop(struct ieee80211_hw *hw)
 	set_hal_stop(rtlhal);
 
 	rtlpci->driver_is_goingto_unload = true;
+	spin_lock_irqsave(&rtlpriv->locks.irq_th_lock, flags);
 	rtlpriv->cfg->ops->disable_interrupt(hw);
+	spin_unlock_irqrestore(&rtlpriv->locks.irq_th_lock, flags);
 	cancel_work_sync(&rtlpriv->works.lps_change_work);
 
 	spin_lock_irqsave(&rtlpriv->locks.rf_ps_lock, flags);

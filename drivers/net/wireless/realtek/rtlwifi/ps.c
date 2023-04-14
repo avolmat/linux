@@ -13,6 +13,7 @@ bool rtl_ps_enable_nic(struct ieee80211_hw *hw)
 	struct rtl_ps_ctl *ppsc = rtl_psc(rtl_priv(hw));
 	struct rtl_hal *rtlhal = rtl_hal(rtl_priv(hw));
 	struct rtl_mac *rtlmac = rtl_mac(rtl_priv(hw));
+        unsigned long flags;
 
 	/*<1> reset trx ring */
 	if (rtlhal->interface == INTF_PCI)
@@ -35,7 +36,9 @@ bool rtl_ps_enable_nic(struct ieee80211_hw *hw)
 			cfg80211_get_chandef_type(&hw->conf.chandef));
 
 	/*<3> Enable Interrupt */
+        spin_lock_irqsave(&rtlpriv->locks.irq_th_lock, flags);
 	rtlpriv->cfg->ops->enable_interrupt(hw);
+        spin_unlock_irqrestore(&rtlpriv->locks.irq_th_lock, flags);
 
 	/*<enable timer> */
 	rtl_watch_dog_timer_callback(&rtlpriv->works.watchdog_timer);
