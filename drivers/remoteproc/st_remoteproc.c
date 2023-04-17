@@ -36,14 +36,12 @@
 
 struct st_rproc_config {
 	bool			sw_reset;
-	bool			pwr_reset;
 	unsigned long		bootaddr_mask;
 };
 
 struct st_rproc {
 	struct st_rproc_config	*config;
 	struct reset_control	*sw_reset;
-	struct reset_control	*pwr_reset;
 	struct clk		*clk;
 	u32			clk_rate;
 	struct regmap		*boot_base;
@@ -182,22 +180,11 @@ static int st_rproc_start(struct rproc *rproc)
 		}
 	}
 
-	if (ddata->config->pwr_reset) {
-		err = reset_control_deassert(ddata->pwr_reset);
-		if (err) {
-			dev_err(&rproc->dev, "Failed to deassert Power Reset\n");
-			goto pwr_reset_fail;
-		}
-	}
-
 	dev_info(&rproc->dev, "Started from 0x%llx\n", rproc->bootaddr);
 
 	return 0;
 
 
-pwr_reset_fail:
-	if (ddata->config->pwr_reset)
-		reset_control_assert(ddata->sw_reset);
 sw_reset_fail:
 	clk_disable(ddata->clk);
 
@@ -213,12 +200,6 @@ static int st_rproc_stop(struct rproc *rproc)
 		sw_err = reset_control_assert(ddata->sw_reset);
 		if (sw_err)
 			dev_err(&rproc->dev, "Failed to assert S/W Reset\n");
-	}
-
-	if (ddata->config->pwr_reset) {
-		pwr_err = reset_control_assert(ddata->pwr_reset);
-		if (pwr_err)
-			dev_err(&rproc->dev, "Failed to assert Power Reset\n");
 	}
 
 	clk_disable(ddata->clk);
@@ -244,34 +225,23 @@ static int st_rproc_state(struct platform_device *pdev)
 {
 	struct rproc *rproc = platform_get_drvdata(pdev);
 	struct st_rproc *ddata = rproc->priv;
-	int reset_sw = 0, reset_pwr = 0;
+	int reset_sw = 0;
 
 	if (ddata->config->sw_reset)
 		reset_sw = reset_control_status(ddata->sw_reset);
 
-	if (ddata->config->pwr_reset)
-		reset_pwr = reset_control_status(ddata->pwr_reset);
-
-	if (reset_sw < 0 || reset_pwr < 0)
+	if (reset_sw < 0)
 		return -EINVAL;
 
-	return !reset_sw && !reset_pwr;
+	return !reset_sw;
 }
-
-static const struct st_rproc_config st40_rproc_cfg = {
-	.sw_reset = true,
-	.pwr_reset = true,
-	.bootaddr_mask = GENMASK(28, 1),
-};
 
 static const struct st_rproc_config st231_rproc_cfg = {
 	.sw_reset = true,
-	.pwr_reset = false,
 	.bootaddr_mask = GENMASK(31, 6),
 };
 
 static const struct of_device_id st_rproc_match[] = {
-	{ .compatible = "st,st40-rproc", .data = &st40_rproc_cfg },
 	{ .compatible = "st,st231-rproc", .data = &st231_rproc_cfg },
 	{},
 };
@@ -291,15 +261,6 @@ static int st_rproc_parse_dt(struct platform_device *pdev)
 		if (IS_ERR(ddata->sw_reset)) {
 			dev_err(dev, "Failed to get S/W Reset\n");
 			return PTR_ERR(ddata->sw_reset);
-		}
-	}
-
-	if (ddata->config->pwr_reset) {
-		ddata->pwr_reset = devm_reset_control_get_exclusive(dev,
-								    "pwr_reset");
-		if (IS_ERR(ddata->pwr_reset)) {
-			dev_err(dev, "Failed to get Power Reset\n");
-			return PTR_ERR(ddata->pwr_reset);
 		}
 	}
 
