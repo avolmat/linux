@@ -52,6 +52,13 @@
 			clock-latency = <100000>;
 			cpu0-supply = <&pwm_regulator>;
 			st,syscfg = <&syscfg_core 0x8e0>;
+			i-cache-size = <0x8000>;
+			i-cache-line-size = <32>;
+			i-cache-sets = <256>;
+			d-cache-size = <0x8000>;
+			d-cache-line-size = <32>;
+			d-cache-sets = <256>;
+			next-level-cache = <&l2>;
 		};
 		cpu@1 {
 			device_type = "cpu";
@@ -66,6 +73,13 @@
 					    1200000 0
 					    800000  0
 					    500000  0>;
+			i-cache-size = <0x8000>;
+			i-cache-line-size = <32>;
+			i-cache-sets = <256>;
+			d-cache-size = <0x8000>;
+			d-cache-line-size = <32>;
+			d-cache-sets = <256>;
+			next-level-cache = <&l2>;
 		};
 	};
 
@@ -96,6 +110,9 @@
 		arm,tag-latency = <2 2 2>;
 		cache-unified;
 		cache-level = <2>;
+		cache-size = <0x100000>;
+		cache-line-size = <32>;
+		cache-sets = <4096>;
 	};
 
 	arm-pmu {
