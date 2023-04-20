@@ -57,6 +57,7 @@ struct sti_compositor_data {
  * @clk_compo_aux: clock for aux compo
  * @clk_pix_main: pixel clock for main path
  * @clk_pix_aux: pixel clock for aux path
+ * @clk_proc_mixer: clock for the mixers
  * @rst_main: reset control of the main path
  * @rst_aux: reset control of the aux path
  * @mixer: array of mixers
@@ -72,6 +73,7 @@ struct sti_compositor {
 	struct clk *clk_compo_aux;
 	struct clk *clk_pix_main;
 	struct clk *clk_pix_aux;
+	struct clk *clk_proc_mixer;
 	struct reset_control *rst_main;
 	struct reset_control *rst_aux;
 	struct sti_mixer *mixer[STI_MAX_MIXER];
