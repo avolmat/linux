@@ -368,7 +368,9 @@ static struct flash_info flash_types[] = {
 	{ "n25q128", 0x20ba18, 0, 64 * 1024,  256, N25Q_FLAG, 108,
 	  stfsm_n25q_config },
 	{ "n25q256", 0x20ba19, 0, 64 * 1024,  512,
-	  N25Q_FLAG | FLASH_FLAG_32BIT_ADDR, 108, stfsm_n25q_config },
+	  (N25Q_FLAG | FLASH_FLAG_32BIT_ADDR) &
+	  ~(FLASH_FLAG_WRITE_1_1_4 | FLASH_FLAG_WRITE_1_4_4),
+	  108, stfsm_n25q_config },
 
 	/*
 	 * Spansion S25FLxxxP
@@ -2132,7 +2134,6 @@ static int stfsm_remove(struct platform_device *pdev)
 	return 0;
 }
 
-#ifdef CONFIG_PM_SLEEP
 static int stfsmfsm_suspend(struct device *dev)
 {
 	struct stfsm *fsm = dev_get_drvdata(dev);
@@ -2148,9 +2149,8 @@ static int stfsmfsm_resume(struct device *dev)
 
 	return clk_prepare_enable(fsm->clk);
 }
-#endif
 
-static SIMPLE_DEV_PM_OPS(stfsm_pm_ops, stfsmfsm_suspend, stfsmfsm_resume);
+static DEFINE_SIMPLE_DEV_PM_OPS(stfsm_pm_ops, stfsmfsm_suspend, stfsmfsm_resume);
 
 static const struct of_device_id stfsm_match[] = {
 	{ .compatible = "st,spi-fsm", },
@@ -2164,7 +2164,7 @@ static struct platform_driver stfsm_driver = {
 	.driver		= {
 		.name	= "st-spi-fsm",
 		.of_match_table = stfsm_match,
-		.pm     = &stfsm_pm_ops,
+		.pm     = pm_sleep_ptr(&stfsm_pm_ops),
 	},
 };
 module_platform_driver(stfsm_driver);

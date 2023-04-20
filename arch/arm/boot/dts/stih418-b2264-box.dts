@@ -1,0 +1,44 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (C) 2021 STMicroelectronics
+ * Author: Jerome Audu <jerome.audu@st.com>
+ */
+/dts-v1/;
+
+#include "stih418-b2264.dts"
+/ {
+	model = "STiH418 B2264 with Box";
+	compatible = "st,stih418-b2264-box", "st,stih418-b2264", "st,stih418";
+	soc {
+		/* I2C available on Pin 3 / Pin 5 of the GPIO 40 pins connector */
+		i2c@9540000 {
+			status = "okay";
+			/* Define SSD1306 OLED controller based on ssd1307fb
+			 * and with I2C address 0x3c
+			 */
+			ssd1307: oled@3c {
+				compatible = "solomon,ssd1306fb-i2c";
+				reg = <0x3c>;
+				solomon,height = <64>;
+				solomon,width = <128>;
+				solomon,page-offset = <0>;
+				solomon,com-invdir;
+			};
+		};
+
+		leds {
+			compatible = "gpio-leds";
+			red {
+				label = "Front Panel LED";
+				gpios = <&pio4 1 GPIO_ACTIVE_HIGH>;
+				linux,default-trigger = "heartbeat";
+			};
+		};
+	};
+};
+
+&pwm1 {
+	pinctrl-0    = <&pinctrl_pwm1_chan0_default
+			&pinctrl_pwm1_chan1_default
+			&pinctrl_pwm1_chan3_default>;
+};
