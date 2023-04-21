@@ -62,7 +62,12 @@ static struct gdp_format_to_str {
 #define GAM_GDP_PML_OFFSET      0x14
 #define GAM_GDP_PMP_OFFSET      0x18
 #define GAM_GDP_SIZE_OFFSET     0x1C
+/* FIXME - in case of STiH418, the structure is all shifted */
+#if 0
 #define GAM_GDP_NVN_OFFSET      0x24
+#else
+#define GAM_GDP_NVN_OFFSET      0x1C
+#endif
 #define GAM_GDP_KEY1_OFFSET     0x28
 #define GAM_GDP_KEY2_OFFSET     0x2C
 #define GAM_GDP_PPT_OFFSET      0x34
@@ -79,6 +84,8 @@ static struct gdp_format_to_str {
 #define GDP_NODE_NB_BANK        2
 #define GDP_NODE_PER_FIELD      2
 
+/* FIXME - in case of STiH418, the structure is all shifted */
+#if 0
 struct sti_gdp_node {
 	u32 gam_gdp_ctl;
 	u32 gam_gdp_agc;
@@ -97,6 +104,39 @@ struct sti_gdp_node {
 	u32 reserved4;
 	u32 gam_gdp_cml;
 };
+#else
+struct sti_gdp_node {
+	u32 gam_gdp_ctl;
+	u32 gam_gdp_agc;
+	u32 gam_gdp_vpo;
+	u32 gam_gdp_vps;
+	u32 gam_gdp_pml;
+	u32 gam_gdp_pmp;
+	u32 gam_gdp_size;
+	u32 gam_gdp_nvn;
+	u32 gam_gdp_key1;
+	u32 gam_gdp_key2;
+	u32 gam_gdp_hfp;
+	u32 gam_gdp_ppt;
+	u32 gam_gdp_vfp;
+	u32 gam_gdp_cml;
+	u32 gam_gdp_crop;
+	u32 gam_gdp_bt0;
+	u32 gam_gdp_bt1;
+	u32 gam_gdp_bt2;
+	u32 gam_gdp_bt3;
+	u32 gam_gdp_bt4;
+	u32 gam_gdp_hsrc;
+	u32 gam_gdp_hip;
+	u32 gam_gdp_hp1;
+	u32 gam_gdp_hp2;
+	u32 gam_gdp_vsrc;
+	u32 gam_gdp_vip;
+	u32 gam_gdp_vp1;
+	u32 gam_gdp_vp2;
+	u32 reserved1[292];
+};
+#endif
 
 struct sti_gdp_node_list {
 	struct sti_gdp_node *top_field;
@@ -216,6 +256,7 @@ static int gdp_dbg_show(struct seq_file *s, void *data)
 {
 	struct drm_info_node *node = s->private;
 	struct sti_gdp *gdp = (struct sti_gdp *)node->info_ent->data;
+	struct device_node *np = gdp->dev->of_node;
 	struct drm_plane *drm_plane = &gdp->plane.drm_plane;
 	struct drm_crtc *crtc;
 
@@ -244,8 +285,10 @@ static int gdp_dbg_show(struct seq_file *s, void *data)
 	DBGFS_DUMP(GAM_GDP_PPT);
 	gdp_dbg_ppt(s, readl(gdp->regs + GAM_GDP_PPT_OFFSET));
 	DBGFS_DUMP(GAM_GDP_CML);
-	DBGFS_DUMP(GAM_GDP_MST);
-	gdp_dbg_mst(s, readl(gdp->regs + GAM_GDP_MST_OFFSET));
+	if (of_device_is_compatible(np, "st,stih407-compositor")) {
+		DBGFS_DUMP(GAM_GDP_MST);
+		gdp_dbg_mst(s, readl(gdp->regs + GAM_GDP_MST_OFFSET));
+	}
 
 	seq_puts(s, "\n\n");
 	if (!crtc)
