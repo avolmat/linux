@@ -179,3 +179,7 @@
 &vtg_aux {
 	status = "okay";
 };
+
+&gpu {
+	status = "okay";
+};
