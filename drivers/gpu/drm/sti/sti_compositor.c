@@ -49,10 +49,10 @@ static const struct sti_compositor_data stih407_compositor_data = {
 static const struct sti_compositor_data stih418_compositor_data = {
 	.nb_subdev = 6,
 	.subdev_desc = {
-			{STI_GPD_SUBDEV, (int)STI_GDP_0, 0x00000},
-			{STI_GPD_SUBDEV, (int)STI_GDP_1, 0x10000},
-			{STI_GPD_SUBDEV, (int)STI_GDP_2, 0x20000},
-			{STI_GPD_SUBDEV, (int)STI_GDP_3, 0x30000},
+			{STI_GPDPLUS_SUBDEV, (int)STI_GDP_0, 0x00000},
+			{STI_GPDPLUS_SUBDEV, (int)STI_GDP_1, 0x10000},
+			{STI_GPDPLUS_SUBDEV, (int)STI_GDP_2, 0x20000},
+			{STI_GPDPLUS_SUBDEV, (int)STI_GDP_3, 0x30000},
 			{STI_MIXER_MAIN_SUBDEV, STI_MIXER_MAIN, 0x100000},
 			{STI_MIXER_AUX_SUBDEV, STI_MIXER_AUX, 0x110000},
 	},
@@ -102,6 +102,7 @@ static int sti_compositor_bind(struct device *dev,
 					     compo->regs + desc[i].offset);
 			break;
 		case STI_GPD_SUBDEV:
+		case STI_GPDPLUS_SUBDEV:
 		case STI_CURSOR_SUBDEV:
 			/* Nothing to do, wait for the second round */
 			break;
@@ -135,7 +136,10 @@ static int sti_compositor_bind(struct device *dev,
 			}
 			break;
 		case STI_GPD_SUBDEV:
+		case STI_GPDPLUS_SUBDEV:
 			primary = sti_gdp_create(drm_dev, compo->dev,
+						 desc[i].type == STI_GPD_SUBDEV ? \
+						 STI_GDP_TYPE_GDP : STI_GDP_TYPE_GDPPLUS,
 						 desc[i].id,
 						 compo->regs + desc[i].offset,
 						 (1 << mixer_id) - 1,
