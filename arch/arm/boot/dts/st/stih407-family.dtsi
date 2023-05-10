@@ -596,6 +596,16 @@
 			status = "disabled";
 		};
 
+		vqmmc_reg: voltage-regulator {
+			compatible = "st,vqmmc";
+			status = "disabled";
+			regulator-name = "vqmmc0";
+			reg = <0x9061004 0x4>;
+			regulator-min-microvolt = <1800000>;
+			regulator-max-microvolt = <3300000>;
+			regulator-always-on;
+		};
+
 		mmc0: sdhci@9060000 {
 			compatible = "st,sdhci-stih407", "st,sdhci";
 			status = "disabled";
@@ -609,6 +619,7 @@
 			clocks = <&clk_s_c0_flexgen CLK_MMC_0>,
 				 <&clk_s_c0_flexgen CLK_RX_ICN_HVA>;
 			bus-width = <8>;
+			vqmmc-supply = <&vqmmc_reg>;
 		};
 
 		mmc1: sdhci@9080000 {
