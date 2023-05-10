@@ -144,6 +144,10 @@
 	};
 };
 
+&vqmmc_reg {
+	status = "okay";
+};
+
 &mmc0 {
 	status = "okay";
 };
