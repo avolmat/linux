@@ -91,6 +91,21 @@
 				sound-dai = <&sti_sasg_codec 1>;
 			};
 		};
+
+		simple-audio-card,dai-link@1 {
+			reg = <1>;
+			/* HDMI */
+			format = "i2s";
+			mclk-fs = <128>;
+			cpu {
+				sound-dai = <&sti_uni_player0>;
+			};
+
+			codec {
+				sound-dai = <&sti_hdmi>;
+			};
+		};
+
 	};
 
 	leds {
@@ -244,6 +259,10 @@
 };
 
 &gpu {
+	status = "okay";
+};
+
+&sti_uni_player0 {
 	status = "okay";
 };
 
