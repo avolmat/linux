@@ -258,6 +258,10 @@
 	status = "okay";
 };
 
+&cec {
+	status = "okay";
+};
+
 &gpu {
 	status = "okay";
 };
