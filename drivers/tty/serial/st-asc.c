@@ -418,13 +418,17 @@ static void asc_break_ctl(struct uart_port *port, int break_state)
  */
 static int asc_startup(struct uart_port *port)
 {
+	unsigned long flags;
+
 	if (request_irq(port->irq, asc_interrupt, 0,
 			asc_port_name(port), port)) {
 		dev_err(port->dev, "cannot allocate irq.\n");
 		return -ENODEV;
 	}
 
+	spin_lock_irqsave(&port->lock, flags);
 	asc_enable_rx_interrupts(port);
+	spin_unlock_irqrestore(&port->lock, flags);
 
 	return 0;
 }
