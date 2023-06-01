@@ -391,6 +391,8 @@ static void asc_start_tx(struct uart_port *port)
 
 	if (!kfifo_is_empty(&tport->xmit_fifo))
 		asc_enable_tx_interrupts(port);
+
+	asc_transmit_chars(port);
 }
 
 /* Transmit stop */
@@ -422,7 +424,6 @@ static int asc_startup(struct uart_port *port)
 		return -ENODEV;
 	}
 
-	asc_transmit_chars(port);
 	asc_enable_rx_interrupts(port);
 
 	return 0;
