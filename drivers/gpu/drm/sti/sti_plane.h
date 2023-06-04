@@ -25,7 +25,9 @@ enum sti_plane_id_of_type {
 	STI_ID_0 = 0,
 	STI_ID_1 = 1,
 	STI_ID_2 = 2,
-	STI_ID_3 = 3
+	STI_ID_3 = 3,
+	STI_ID_4 = 4,
+	STI_ID_5 = 5,
 };
 
 enum sti_plane_desc {
@@ -33,7 +35,11 @@ enum sti_plane_desc {
 	STI_GDP_1       = STI_GDP | STI_ID_1,
 	STI_GDP_2       = STI_GDP | STI_ID_2,
 	STI_GDP_3       = STI_GDP | STI_ID_3,
+	STI_GDP_4       = STI_GDP | STI_ID_4,
+	STI_GDP_5       = STI_GDP | STI_ID_5,
 	STI_HQVDP_0     = STI_VDP | STI_ID_0,
+	STI_HQVDP_1     = STI_VDP | STI_ID_1,
+	STI_HQVDP_2     = STI_VDP | STI_ID_2,
 	STI_CURSOR      = STI_CUR,
 	STI_BACK        = STI_BCK
 };
