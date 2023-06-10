@@ -5,7 +5,6 @@
  */
 /dts-v1/;
 #include "stih418.dtsi"
-#include "stih418-pinctrl.dtsi"
 #include <dt-bindings/gpio/gpio.h>
 / {
 	model = "STiH418 B2264";
@@ -74,13 +73,6 @@
 		ethernet0 = &ethernet0;
 	};
 
-	panel_backlight: panel-backlight {
-		compatible = "gpio-backlight";
-		gpios = <&pio19 4 GPIO_ACTIVE_HIGH>;
-		default-on;
-		status = "okay";
-	};
-
 	soc {
 		leds {
 			compatible = "gpio-leds";
@@ -110,12 +102,6 @@
 			st,i2c-min-scl-pulse-width-us = <0>;
 			st,i2c-min-sda-pulse-width-us = <5>;
 
-			status = "okay";
-		};
-
-		panel_rgb: panel-rgb {
-			compatible = "ampire,am-480272h3tmqw-t01h";
-			backlight = <&panel_backlight>;
 			status = "okay";
 		};
 	};
@@ -173,15 +159,6 @@
 };
 
 &sti_compo {
-	status = "okay";
-};
-
-&sti_dvo {
-
-
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_dvo0_default>;
-	sti,panel = <&panel_rgb>;
 	status = "okay";
 };
 
