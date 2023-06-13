@@ -2698,6 +2698,12 @@ static int uart_poll_init(struct tty_driver *driver, int line, char *options)
 	tport = &state->port;
 	mutex_lock(&tport->mutex);
 
+	/*
+	 * Make sure the device is in D0 state.
+	 * However we don't have anyway to change back the pm state to OFF later.
+	 */
+	uart_change_pm(state, UART_PM_STATE_ON);
+
 	port = uart_port_check(state);
 	if (!port || port->type == PORT_UNKNOWN ||
 	    !(port->ops->poll_get_char && port->ops->poll_put_char)) {
