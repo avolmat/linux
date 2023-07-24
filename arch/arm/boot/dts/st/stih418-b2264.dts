@@ -66,6 +66,7 @@
 
 	aliases {
 		serial0 = &sbc_serial0;
+		serial1 = &sbc_serial1;
 		ethernet0 = &ethernet0;
 	};
 
@@ -166,6 +167,10 @@
 };
 
 &sbc_serial0 {
+	status = "okay";
+};
+
+&sbc_serial1 {
 	status = "okay";
 };
 
