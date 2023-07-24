@@ -350,7 +350,7 @@
 			status = "disabled";
 		};
 
-		serial@9531000 {
+		sbc_serial1: serial@9531000 {
 			compatible = "st,asc";
 			reg = <0x9531000 0x2c>;
 			interrupts = <GIC_SPI 139 IRQ_TYPE_LEVEL_HIGH>;
