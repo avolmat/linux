@@ -28,8 +28,16 @@ const char *sti_plane_to_str(struct sti_plane *plane)
 		return "GDP2";
 	case STI_GDP_3:
 		return "GDP3";
+	case STI_GDP_4:
+		return "GDP4";
+	case STI_GDP_5:
+		return "GDP5";
 	case STI_HQVDP_0:
 		return "HQVDP0";
+	case STI_HQVDP_1:
+		return "HQVDP1";
+	case STI_HQVDP_2:
+		return "HQVDP2";
 	case STI_CURSOR:
 		return "CURSOR";
 	default:
