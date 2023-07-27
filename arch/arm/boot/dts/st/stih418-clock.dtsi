@@ -17,7 +17,7 @@
 	clk_tmdsout_hdmi: clk-tmdsout-hdmi {
 		#clock-cells = <0>;
 		compatible = "fixed-clock";
-		clock-frequency = <0>;
+		clock-frequency = <594000000>;
 	};
 
 	clocks {

@@ -6,6 +6,7 @@
 #include "stih418-clock.dtsi"
 #include "stih407-family.dtsi"
 #include "stih410-pinctrl.dtsi"
+#include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/thermal/thermal.h>
 / {
 	cpus {
@@ -153,6 +154,159 @@
 			clocks = <&clk_sysin>;
 			interrupts = <GIC_SPI 205 IRQ_TYPE_EDGE_RISING>;
 			#thermal-sensor-cells = <0>;
+		};
+
+		sti-display-subsystem@0 {
+			compatible = "st,sti-display-subsystem";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			reg = <0 0>;
+			assigned-clocks = <&clk_s_d2_quadfs 0>,
+					  <&clk_s_d2_quadfs 1>,
+					  <&clk_s_d2_flexgen CLK_TMDS_HDMI_DIV2>,
+					  <&clk_s_d2_flexgen CLK_TMDS_HDMI>,
+					  <&clk_s_d2_flexgen CLK_PIX_MAIN_DISP>,
+					  <&clk_s_d2_flexgen CLK_PIX_AUX_DISP>,
+					  <&clk_s_c0_flexgen CLK_MAIN_DISP>,
+					  <&clk_s_c0_flexgen CLK_AUX_DISP>,
+					  <&clk_s_c0_flexgen CLK_COMPO_DVP>,
+					  <&clk_s_c0_flexgen CLK_PROC_MIXER>;
+
+			assigned-clock-parents = <0>,
+						 <0>,
+						 <&clk_tmdsout_hdmi>,
+						 <&clk_tmdsout_hdmi>,
+						 <&clk_s_d2_quadfs 0>,
+						 <&clk_s_d2_quadfs 1>,
+						 <&clk_s_c0_pll1 0>,
+						 <&clk_s_c0_pll1 0>,
+						 <&clk_s_c0_pll0 0>,
+						 <&clk_s_c0_pll0 0>;
+
+			assigned-clock-rates = <297000000>,
+					       <108000000>,
+					       <297000000>,
+					       <0>,
+					       <74250000>,
+					       <13500000>,
+					       <400000000>,
+					       <400000000>,
+					       <355000000>,
+					       <355000000>;
+
+			ranges;
+
+			sti_compo: sti-compositor@a600000 {
+				compatible = "st,stih418-compositor";
+				reg = <0xa600000 0x200000>;
+
+				clock-names = "compo_main",
+					      "compo_aux",
+					      "pix_main",
+					      "pix_aux",
+					      "proc_mixer";
+
+				clocks = <&clk_s_c0_flexgen CLK_COMPO_DVP>,
+					 <&clk_s_c0_flexgen CLK_COMPO_DVP>,
+					 <&clk_s_d2_flexgen CLK_PIX_MAIN_DISP>,
+					 <&clk_s_d2_flexgen CLK_PIX_AUX_DISP>,
+					 <&clk_s_c0_flexgen CLK_PROC_MIXER>;
+
+				reset-names = "compo-main", "compo-aux";
+				resets = <&softreset STIH407_COMPO_SOFTRESET>,
+					 <&softreset STIH407_COMPO_SOFTRESET>;
+				st,vtg = <&vtg_main>, <&vtg_aux>;
+
+				status = "disabled";
+			};
+
+			sti_tvout: sti-tvout@a900000 {
+				compatible = "st,stih418-tvout";
+				reg = <0xa900000 0x1000>;
+				reg-names = "tvout-reg";
+				reset-names = "tvout";
+				resets = <&softreset STIH407_HDTVOUT_SOFTRESET>;
+				#address-cells = <1>;
+				#size-cells = <1>;
+				assigned-clocks = <&clk_s_d2_flexgen CLK_PIX_HDMI>,
+						  <&clk_s_d2_flexgen CLK_TMDS_HDMI>,
+						  <&clk_s_d2_flexgen CLK_REF_HDMIPHY>,
+						  <&clk_s_d0_flexgen CLK_PCM_0>,
+						  <&clk_s_d2_flexgen CLK_PIX_HDDAC>,
+						  <&clk_s_d2_flexgen CLK_HDDAC>;
+
+				assigned-clock-parents = <&clk_s_d2_quadfs 0>,
+							 <&clk_tmdsout_hdmi>,
+							 <&clk_s_d2_quadfs 0>,
+							 <&clk_s_d0_quadfs 0>,
+							 <&clk_s_d2_quadfs 0>,
+							 <&clk_s_d2_quadfs 0>;
+				assigned-clock-rates = <74250000>,
+						       <0>,
+						       <74250000>,
+						       <0>,
+						       <74250000>,
+						       <148500000>;
+
+				status = "disabled";
+			};
+
+			sti_dvo: sti-dvo@a800400 {
+				compatible = "st,stih407-dvo";
+				reg = <0xa800400 0x200>;
+				reg-names = "dvo-reg";
+				clock-names = "dvo_pix", "dvo",
+					      "main_parent", "aux_parent";
+				clocks = <&clk_s_d2_flexgen CLK_PIX_DVO>,
+					 <&clk_s_d2_flexgen CLK_DVO>,
+					 <&clk_s_d2_quadfs 0>, <&clk_s_d2_quadfs 1>;
+				status = "disabled";
+			};
+
+			sti_hdmi: sti-hdmi@a804000 {
+				compatible = "st,stih418-hdmi";
+				reg = <0xa804000 0x1000>;
+				reg-names = "hdmi-reg";
+				#sound-dai-cells = <0>;
+				interrupts = <GIC_SPI 106 IRQ_TYPE_LEVEL_HIGH>;
+				interrupt-names = "irq";
+				clock-names = "pix",
+					      "tmds",
+					      "phy",
+					      "audio",
+					      "main_parent",
+					      "aux_parent";
+
+				clocks = <&clk_s_d2_flexgen CLK_PIX_HDMI>,
+					 <&clk_s_d2_flexgen CLK_TMDS_HDMI>,
+					 <&clk_s_d2_flexgen CLK_REF_HDMIPHY>,
+					 <&clk_s_d0_flexgen CLK_PCM_0>,
+					 <&clk_s_d2_quadfs 0>,
+					 <&clk_s_d2_quadfs 1>;
+
+				hdmi,hpd-gpio = <&pio5 3 GPIO_ACTIVE_LOW>;
+				reset-names = "hdmi";
+				resets = <&softreset STIH407_HDMI_TX_PHY_SOFTRESET>;
+
+				status = "disabled";
+			};
+		};
+
+		vtg_main: sti-vtg-main@a802800 {
+			compatible = "st,stih418-vtg";
+			reg = <0xa802800 0x200>;
+			interrupts = <GIC_SPI 108 IRQ_TYPE_LEVEL_HIGH>;
+
+			status = "disabled";
+		};
+
+		vtg_aux: sti-vtg-aux@a800200 {
+			compatible = "st,stih418-vtg";
+			reg = <0xa800200 0x100>;
+			interrupts = <GIC_SPI 109 IRQ_TYPE_LEVEL_HIGH>;
+
+			status = "disabled";
 		};
 	};
 };
