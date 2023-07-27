@@ -27,6 +27,7 @@
 
 #include "sti_hdmi.h"
 #include "sti_hdmi_tx3g4c28phy.h"
+#include "sti_hdmi_tx6g0c28phy.h"
 #include "sti_vtg.h"
 
 #define HDMI_CFG                        0x0000
@@ -1363,6 +1364,9 @@ static const struct of_device_id hdmi_of_match[] = {
 	{
 		.compatible = "st,stih407-hdmi",
 		.data = &tx3g4c28phy_ops,
+	}, {
+		.compatible = "st,stih418-hdmi",
+		.data = &tx6g0c28phy_ops,
 	}, {
 		/* end node */
 	}
