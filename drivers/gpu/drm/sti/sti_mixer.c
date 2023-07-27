@@ -7,6 +7,7 @@
  */
 
 #include <linux/moduleparam.h>
+#include <linux/of.h>
 #include <linux/seq_file.h>
 
 #include <drm/drm_print.h>
@@ -23,10 +24,12 @@ module_param_named(bkgcolor, bkg_color, int, 0644);
 /* regs offset */
 #define GAM_MIXER_CTL      0x00
 #define GAM_MIXER_BKC      0x04
+#define GAM_MIXER_OFF	   0x08 /* Only for STiH418 */
 #define GAM_MIXER_BCO      0x0C
 #define GAM_MIXER_BCS      0x10
 #define GAM_MIXER_AVO      0x28
 #define GAM_MIXER_AVS      0x2C
+#define GAM_MIXER_CRB2     0x30 /* Only for STiH418 */
 #define GAM_MIXER_CRB      0x34
 #define GAM_MIXER_ACT      0x38
 #define GAM_MIXER_MBP      0x3C
@@ -102,13 +105,22 @@ static void mixer_dbg_ctl(struct seq_file *s, int val)
 		seq_puts(s, "Nothing");
 }
 
-static void mixer_dbg_crb(struct seq_file *s, int val)
+static void mixer_dbg_crb(struct seq_file *s, struct sti_mixer *mixer, u64 val)
 {
 	int i;
+	u32 shift, mask_id;
+
+	if (of_device_is_compatible(mixer->dev->of_node, "st,stih418-compositor")) {
+		shift = 4;
+		mask_id = 0x0f;
+	} else {
+		shift = 3;
+		mask_id = 0x07;
+	}
 
 	seq_puts(s, "\tDepth: ");
 	for (i = 0; i < GAM_MIXER_NB_DEPTH_LEVEL; i++) {
-		switch (val & GAM_DEPTH_MASK_ID) {
+		switch (val & mask_id) {
 		case GAM_DEPTH_VID0_ID:
 			seq_puts(s, "VID0");
 			break;
@@ -133,7 +145,7 @@ static void mixer_dbg_crb(struct seq_file *s, int val)
 
 		if (i < GAM_MIXER_NB_DEPTH_LEVEL - 1)
 			seq_puts(s, " < ");
-		val = val >> 3;
+		val = val >> shift;
 	}
 }
 
@@ -149,6 +161,7 @@ static int mixer_dbg_show(struct seq_file *s, void *arg)
 {
 	struct drm_info_node *node = s->private;
 	struct sti_mixer *mixer = (struct sti_mixer *)node->info_ent->data;
+	u64 val;
 
 	seq_printf(s, "%s: (vaddr = 0x%p)",
 		   sti_mixer_to_str(mixer), mixer->regs);
@@ -161,11 +174,18 @@ static int mixer_dbg_show(struct seq_file *s, void *arg)
 	DBGFS_DUMP(GAM_MIXER_AVO);
 	DBGFS_DUMP(GAM_MIXER_AVS);
 	DBGFS_DUMP(GAM_MIXER_CRB);
-	mixer_dbg_crb(s, sti_mixer_reg_read(mixer, GAM_MIXER_CRB));
+	val = sti_mixer_reg_read(mixer, GAM_MIXER_CRB);
+	if (of_device_is_compatible(mixer->dev->of_node, "st,stih418-compositor")) {
+		DBGFS_DUMP(GAM_MIXER_CRB2);
+		val |= ((u64)sti_mixer_reg_read(mixer, GAM_MIXER_CRB2) << 32);
+	}
+	mixer_dbg_crb(s, mixer, val);
 	DBGFS_DUMP(GAM_MIXER_ACT);
-	DBGFS_DUMP(GAM_MIXER_MBP);
-	DBGFS_DUMP(GAM_MIXER_MX0);
-	mixer_dbg_mxn(s, mixer->regs + GAM_MIXER_MX0);
+	if (of_device_is_compatible(mixer->dev->of_node, "st,stih407-compositor")) {
+		DBGFS_DUMP(GAM_MIXER_MBP);
+		DBGFS_DUMP(GAM_MIXER_MX0);
+		mixer_dbg_mxn(s, mixer->regs + GAM_MIXER_MX0);
+	}
 	seq_putc(s, '\n');
 	return 0;
 }
@@ -238,7 +258,16 @@ int sti_mixer_set_plane_depth(struct sti_mixer *mixer, struct sti_plane *plane)
 {
 	int plane_id, depth = plane->drm_plane.state->normalized_zpos;
 	unsigned int i;
-	u32 mask, val;
+	u64 mask, val;
+	u32 shift, mask_id;
+
+	if (of_device_is_compatible(mixer->dev->of_node, "st,stih418-compositor")) {
+		shift = 4;
+		mask_id = 0x0f;
+	} else {
+		shift = 3;
+		mask_id = 0x07;
+	}
 
 	switch (plane->desc) {
 	case STI_GDP_0:
@@ -266,26 +295,37 @@ int sti_mixer_set_plane_depth(struct sti_mixer *mixer, struct sti_plane *plane)
 
 	/* Search if a previous depth was already assigned to the plane */
 	val = sti_mixer_reg_read(mixer, GAM_MIXER_CRB);
+	if (of_device_is_compatible(mixer->dev->of_node, "st,stih418-compositor"))
+		val |= ((u64)sti_mixer_reg_read(mixer, GAM_MIXER_CRB2) << 32);
 	for (i = 0; i < GAM_MIXER_NB_DEPTH_LEVEL; i++) {
-		mask = GAM_DEPTH_MASK_ID << (3 * i);
-		if ((val & mask) == plane_id << (3 * i))
+		mask = mask_id << (shift * i);
+		if ((val & mask) == plane_id << (shift * i))
 			break;
 	}
 
-	mask |= GAM_DEPTH_MASK_ID << (3 * depth);
-	plane_id = plane_id << (3 * depth);
+	mask |= mask_id << (shift * depth);
+	plane_id = plane_id << (shift * depth);
 
 	DRM_DEBUG_DRIVER("%s %s depth=%d\n", sti_mixer_to_str(mixer),
 			 sti_plane_to_str(plane), depth);
 	dev_dbg(mixer->dev, "GAM_MIXER_CRB val 0x%x mask 0x%x\n",
-		plane_id, mask);
+		plane_id, (u32)(mask & 0xffffffff));
+	if (of_device_is_compatible(mixer->dev->of_node, "st,stih418-compositor"))
+		dev_dbg(mixer->dev, "GAM_MIXER_CRB2 val 0x%x mask 0x%x\n",
+			plane_id, (u32)(mask >> 32));
 
 	val &= ~mask;
 	val |= plane_id;
-	sti_mixer_reg_write(mixer, GAM_MIXER_CRB, val);
+	sti_mixer_reg_write(mixer, GAM_MIXER_CRB, val & 0xffffffff);
+	if (of_device_is_compatible(mixer->dev->of_node, "st,stih418-compositor"))
+		sti_mixer_reg_write(mixer, GAM_MIXER_CRB2, val >> 32);
 
 	dev_dbg(mixer->dev, "Read GAM_MIXER_CRB 0x%x\n",
 		sti_mixer_reg_read(mixer, GAM_MIXER_CRB));
+	if (of_device_is_compatible(mixer->dev->of_node, "st,stih418-compositor"))
+		dev_dbg(mixer->dev, "Read GAM_MIXER_CRB2 0x%x\n",
+			sti_mixer_reg_read(mixer, GAM_MIXER_CRB2));
+
 	return 0;
 }
 
@@ -351,6 +391,9 @@ int sti_mixer_set_plane_status(struct sti_mixer *mixer,
 	val &= ~mask;
 	val |= status ? mask : 0;
 	sti_mixer_reg_write(mixer, GAM_MIXER_CTL, val);
+
+	if (of_device_is_compatible(mixer->dev->of_node, "st,stih418-compositor"))
+		sti_mixer_reg_write(mixer, GAM_MIXER_OFF, 0x02);
 
 	return 0;
 }
