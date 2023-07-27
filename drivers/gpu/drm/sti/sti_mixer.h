@@ -61,7 +61,8 @@ void sti_mixer_set_background_status(struct sti_mixer *mixer, bool enable);
 void sti_mixer_debugfs_init(struct sti_mixer *mixer, struct drm_minor *minor);
 
 /* depth in Cross-bar control = z order */
-#define GAM_MIXER_NB_DEPTH_LEVEL 6
+#define GAM_MIXER_NB_DEPTH_LEVEL_STIH407 6
+#define GAM_MIXER_NB_DEPTH_LEVEL_STIH418 9
 
 #define STI_MIXER_MAIN 0
 #define STI_MIXER_AUX  1
