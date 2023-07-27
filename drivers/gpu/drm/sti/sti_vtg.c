@@ -60,6 +60,18 @@
 #define VTG_TOP_V_HD_4      0x012c
 #define VTG_BOT_V_HD_4      0x0130
 
+#define VTG_H_HD_5          0x0140
+#define VTG_TOP_V_VD_5      0x0144
+#define VTG_BOT_V_VD_5      0x0148
+#define VTG_TOP_V_HD_5      0x014c
+#define VTG_BOT_V_HD_5      0x0150
+
+#define VTG_H_HD_6          0x0160
+#define VTG_TOP_V_VD_6      0x0164
+#define VTG_BOT_V_VD_6      0x0168
+#define VTG_TOP_V_HD_6      0x016c
+#define VTG_BOT_V_HD_6      0x0170
+
 #define VTG_IRQ_BOTTOM      BIT(0)
 #define VTG_IRQ_TOP         BIT(1)
 #define VTG_IRQ_MASK        (VTG_IRQ_TOP | VTG_IRQ_BOTTOM)
@@ -92,7 +104,12 @@ struct sti_vtg_regs_offs {
 	u32 bot_v_hd;
 };
 
-#define VTG_MAX_SYNC_OUTPUT 4
+struct sti_vtg_data {
+	unsigned int nb_sync_output;
+	unsigned int hdmi_sync_id;
+};
+
+#define VTG_MAX_SYNC_OUTPUT 6
 static const struct sti_vtg_regs_offs vtg_regs_offs[VTG_MAX_SYNC_OUTPUT] = {
 	{ VTG_H_HD_1,
 	  VTG_TOP_V_VD_1, VTG_BOT_V_VD_1, VTG_TOP_V_HD_1, VTG_BOT_V_HD_1 },
@@ -101,7 +118,11 @@ static const struct sti_vtg_regs_offs vtg_regs_offs[VTG_MAX_SYNC_OUTPUT] = {
 	{ VTG_H_HD_3,
 	  VTG_TOP_V_VD_3, VTG_BOT_V_VD_3, VTG_TOP_V_HD_3, VTG_BOT_V_HD_3 },
 	{ VTG_H_HD_4,
-	  VTG_TOP_V_VD_4, VTG_BOT_V_VD_4, VTG_TOP_V_HD_4, VTG_BOT_V_HD_4 }
+	  VTG_TOP_V_VD_4, VTG_BOT_V_VD_4, VTG_TOP_V_HD_4, VTG_BOT_V_HD_4 },
+	{ VTG_H_HD_5,
+	  VTG_TOP_V_VD_5, VTG_BOT_V_VD_5, VTG_TOP_V_HD_5, VTG_BOT_V_HD_5 },
+	{ VTG_H_HD_6,
+	  VTG_TOP_V_VD_6, VTG_BOT_V_VD_6, VTG_TOP_V_HD_6, VTG_BOT_V_HD_6 }
 };
 
 /*
@@ -138,6 +159,7 @@ struct sti_vtg {
 	u32 irq_status;
 	struct raw_notifier_head notifier_list;
 	struct drm_crtc *crtc;
+	struct sti_vtg_data data;
 };
 
 struct sti_vtg *of_vtg_find(struct device_node *np)
@@ -252,7 +274,7 @@ static void vtg_set_mode(struct sti_vtg *vtg,
 	vtg_set_output_window(vtg->regs, mode);
 
 	/* Set hsync and vsync position for HDMI */
-	vtg_set_hsync_vsync_pos(&sync[VTG_SYNC_ID_HDMI - 1], HDMI_DELAY, mode);
+	vtg_set_hsync_vsync_pos(&sync[vtg->data.hdmi_sync_id - 1], HDMI_DELAY, mode);
 
 	/* Set hsync and vsync position for HD DCS */
 	vtg_set_hsync_vsync_pos(&sync[VTG_SYNC_ID_HDDCS - 1], 0, mode);
@@ -264,7 +286,7 @@ static void vtg_set_mode(struct sti_vtg *vtg,
 	vtg_set_hsync_vsync_pos(&sync[VTG_SYNC_ID_DVO - 1], DVO_DELAY, mode);
 
 	/* Progam the syncs outputs */
-	for (i = 0; i < VTG_MAX_SYNC_OUTPUT ; i++) {
+	for (i = 0; i < vtg->data.nb_sync_output ; i++) {
 		writel(sync[i].hsync,
 		       vtg->regs + vtg_regs_offs[i].h_hd);
 		writel(sync[i].vsync_line_top,
@@ -376,9 +398,27 @@ static irqreturn_t vtg_irq(int irq, void *arg)
 	return IRQ_WAKE_THREAD;
 }
 
+static const struct sti_vtg_data stih407_vtg_data = {
+	.nb_sync_output = 4,
+	.hdmi_sync_id = 1,
+};
+
+static const struct sti_vtg_data stih418_vtg_data = {
+	.nb_sync_output = 6,
+	.hdmi_sync_id = 5,
+};
+
+static const struct of_device_id vtg_of_match[] = {
+	{ .compatible = "st,vtg", .data = &stih407_vtg_data, },
+	{ .compatible = "st,stih418-vtg", .data = &stih418_vtg_data, },
+	{ /* sentinel */ }
+};
+MODULE_DEVICE_TABLE(of, vtg_of_match);
+
 static int vtg_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
+	struct device_node *np = dev->of_node;
 	struct sti_vtg *vtg;
 	struct resource *res;
 	int ret;
@@ -386,6 +426,14 @@ static int vtg_probe(struct platform_device *pdev)
 	vtg = devm_kzalloc(dev, sizeof(*vtg), GFP_KERNEL);
 	if (!vtg)
 		return -ENOMEM;
+
+	memcpy(&vtg->data, of_match_node(vtg_of_match, np)->data,
+	       sizeof(struct sti_vtg_data));
+
+	if (vtg->data.nb_sync_output > VTG_MAX_SYNC_OUTPUT) {
+		dev_err(dev, "Invalid number of VTG sync output\n");
+		return -EINVAL;
+	}
 
 	/* Get Memory ressources */
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
@@ -421,12 +469,6 @@ static int vtg_probe(struct platform_device *pdev)
 
 	return 0;
 }
-
-static const struct of_device_id vtg_of_match[] = {
-	{ .compatible = "st,vtg", },
-	{ /* sentinel */ }
-};
-MODULE_DEVICE_TABLE(of, vtg_of_match);
 
 struct platform_driver sti_vtg_driver = {
 	.driver = {
