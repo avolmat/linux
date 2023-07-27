@@ -118,6 +118,7 @@ struct sti_tvout {
 	struct drm_encoder *hda;
 	struct drm_encoder *dvo;
 	bool debugfs_registered;
+	unsigned int hdmi_sync_id;
 };
 
 struct sti_tvout_encoder {
@@ -129,6 +130,10 @@ struct sti_tvout_encoder {
 	container_of(x, struct sti_tvout_encoder, encoder)
 
 #define to_sti_tvout(x) to_sti_tvout_encoder(x)->tvout
+
+struct sti_tvout_data {
+	unsigned int hdmi_sync_id;
+};
 
 /* preformatter conversion matrix */
 static const u32 rgb_to_ycbcr_601[8] = {
@@ -359,14 +364,14 @@ static void tvout_hdmi_start(struct sti_tvout *tvout, bool main_path)
 		DRM_DEBUG_DRIVER("main vip for hdmi\n");
 		/* select the input sync for hdmi */
 		tvout_write(tvout,
-			    TVO_SYNC_MAIN_VTG_SET_REF | VTG_SYNC_ID_HDMI,
+			    TVO_SYNC_MAIN_VTG_SET_REF | tvout->hdmi_sync_id,
 			    TVO_HDMI_SYNC_SEL);
 		tvo_in_vid_format = TVO_MAIN_IN_VID_FORMAT;
 	} else {
 		DRM_DEBUG_DRIVER("aux vip for hdmi\n");
 		/* select the input sync for hdmi */
 		tvout_write(tvout,
-			    TVO_SYNC_AUX_VTG_SET_REF | VTG_SYNC_ID_HDMI,
+			    TVO_SYNC_AUX_VTG_SET_REF | tvout->hdmi_sync_id,
 			    TVO_HDMI_SYNC_SEL);
 		tvo_in_vid_format = TVO_AUX_IN_VID_FORMAT;
 	}
@@ -833,10 +838,26 @@ static const struct component_ops sti_tvout_ops = {
 	.unbind	= sti_tvout_unbind,
 };
 
+static const struct sti_tvout_data stih407_tvout_data = {
+	.hdmi_sync_id = 1,
+};
+
+static const struct sti_tvout_data stih418_tvout_data = {
+	.hdmi_sync_id = 5,
+};
+
+static const struct of_device_id tvout_of_match[] = {
+	{ .compatible = "st,stih407-tvout", .data = &stih407_tvout_data, },
+	{ .compatible = "st,stih418-tvout", .data = &stih418_tvout_data, },
+	{ /* end node */ }
+};
+MODULE_DEVICE_TABLE(of, tvout_of_match);
+
 static int sti_tvout_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	struct device_node *node = dev->of_node;
+	const struct sti_tvout_data *data;
 	struct sti_tvout *tvout;
 	struct resource *res;
 
@@ -850,6 +871,10 @@ static int sti_tvout_probe(struct platform_device *pdev)
 		return -ENOMEM;
 
 	tvout->dev = dev;
+
+	/* populate data structure depending on compatibility */
+	data = of_match_node(tvout_of_match, node)->data;
+	tvout->hdmi_sync_id = data->hdmi_sync_id;
 
 	/* get memory resources */
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "tvout-reg");
@@ -876,12 +901,6 @@ static void sti_tvout_remove(struct platform_device *pdev)
 {
 	component_del(&pdev->dev, &sti_tvout_ops);
 }
-
-static const struct of_device_id tvout_of_match[] = {
-	{ .compatible = "st,stih407-tvout", },
-	{ /* end node */ }
-};
-MODULE_DEVICE_TABLE(of, tvout_of_match);
 
 struct platform_driver sti_tvout_driver = {
 	.driver = {
