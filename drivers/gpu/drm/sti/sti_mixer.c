@@ -42,7 +42,9 @@ module_param_named(bkgcolor, bkg_color, int, 0644);
 #define GAM_DEPTH_GDP1_ID  4
 #define GAM_DEPTH_GDP2_ID  5
 #define GAM_DEPTH_GDP3_ID  6
-#define GAM_DEPTH_MASK_ID  7
+#define GAM_DEPTH_GDP4_ID  7
+#define GAM_DEPTH_GDP5_ID  8
+#define GAM_DEPTH_VID2_ID  9
 
 /* mask in CTL reg */
 #define GAM_CTL_BACK_MASK  BIT(0)
@@ -52,6 +54,10 @@ module_param_named(bkgcolor, bkg_color, int, 0644);
 #define GAM_CTL_GDP1_MASK  BIT(4)
 #define GAM_CTL_GDP2_MASK  BIT(5)
 #define GAM_CTL_GDP3_MASK  BIT(6)
+#define GAM_CTL_GDP4_MASK  BIT(7)
+#define GAM_CTL_GDP5_MASK  BIT(8)
+/* CURSOR doesn't exist on STiH418 where VID2 exist */
+#define GAM_CTL_VID2_MASK  BIT(9)
 #define GAM_CTL_CURSOR_MASK BIT(9)
 
 const char *sti_mixer_to_str(struct sti_mixer *mixer)
@@ -80,15 +86,16 @@ static inline void sti_mixer_reg_write(struct sti_mixer *mixer,
 #define DBGFS_DUMP(reg) seq_printf(s, "\n  %-25s 0x%08X", #reg, \
 				   sti_mixer_reg_read(mixer, reg))
 
-static void mixer_dbg_ctl(struct seq_file *s, int val)
+static void mixer_dbg_ctl(struct seq_file *s, int val, int depth)
 {
 	unsigned int i;
 	int count = 0;
 	char *const disp_layer[] = {"BKG", "VID0", "VID1", "GDP0",
-				    "GDP1", "GDP2", "GDP3"};
+				    "GDP1", "GDP2", "GDP3", "GDP4",
+				    "GDP5", "VID2"};
 
 	seq_puts(s, "\tEnabled: ");
-	for (i = 0; i < 7; i++) {
+	for (i = 0; i < depth; i++) {
 		if (val & 1) {
 			seq_printf(s, "%s ", disp_layer[i]);
 			count++;
@@ -108,18 +115,20 @@ static void mixer_dbg_ctl(struct seq_file *s, int val)
 static void mixer_dbg_crb(struct seq_file *s, struct sti_mixer *mixer, u64 val)
 {
 	int i;
-	u32 shift, mask_id;
+	u32 shift, mask_id, mixer_depth;
 
 	if (of_device_is_compatible(mixer->dev->of_node, "st,stih418-compositor")) {
 		shift = 4;
 		mask_id = 0x0f;
+		mixer_depth = GAM_MIXER_NB_DEPTH_LEVEL_STIH418;
 	} else {
 		shift = 3;
 		mask_id = 0x07;
+		mixer_depth = GAM_MIXER_NB_DEPTH_LEVEL_STIH407;
 	}
 
 	seq_puts(s, "\tDepth: ");
-	for (i = 0; i < GAM_MIXER_NB_DEPTH_LEVEL; i++) {
+	for (i = 0; i < mixer_depth; i++) {
 		switch (val & mask_id) {
 		case GAM_DEPTH_VID0_ID:
 			seq_puts(s, "VID0");
@@ -139,11 +148,20 @@ static void mixer_dbg_crb(struct seq_file *s, struct sti_mixer *mixer, u64 val)
 		case GAM_DEPTH_GDP3_ID:
 			seq_puts(s, "GDP3");
 			break;
+		case GAM_DEPTH_GDP4_ID:
+			seq_puts(s, "GDP4");
+			break;
+		case GAM_DEPTH_GDP5_ID:
+			seq_puts(s, "GDP5");
+			break;
+		case GAM_DEPTH_VID2_ID:
+			seq_puts(s, "VID2");
+			break;
 		default:
 			seq_puts(s, "---");
 		}
 
-		if (i < GAM_MIXER_NB_DEPTH_LEVEL - 1)
+		if (i < mixer_depth - 1)
 			seq_puts(s, " < ");
 		val = val >> shift;
 	}
@@ -161,13 +179,19 @@ static int mixer_dbg_show(struct seq_file *s, void *arg)
 {
 	struct drm_info_node *node = s->private;
 	struct sti_mixer *mixer = (struct sti_mixer *)node->info_ent->data;
+	int depth;
 	u64 val;
+
+	if (of_device_is_compatible(mixer->dev->of_node, "st,stih418-compositor"))
+		depth = GAM_MIXER_NB_DEPTH_LEVEL_STIH418 + 1;
+	else
+		depth = GAM_MIXER_NB_DEPTH_LEVEL_STIH407 + 1;
 
 	seq_printf(s, "%s: (vaddr = 0x%p)",
 		   sti_mixer_to_str(mixer), mixer->regs);
 
 	DBGFS_DUMP(GAM_MIXER_CTL);
-	mixer_dbg_ctl(s, sti_mixer_reg_read(mixer, GAM_MIXER_CTL));
+	mixer_dbg_ctl(s, sti_mixer_reg_read(mixer, GAM_MIXER_CTL), depth);
 	DBGFS_DUMP(GAM_MIXER_BKC);
 	DBGFS_DUMP(GAM_MIXER_BCO);
 	DBGFS_DUMP(GAM_MIXER_BCS);
@@ -259,14 +283,16 @@ int sti_mixer_set_plane_depth(struct sti_mixer *mixer, struct sti_plane *plane)
 	int plane_id, depth = plane->drm_plane.state->normalized_zpos;
 	unsigned int i;
 	u64 mask, val;
-	u32 shift, mask_id;
+	u32 shift, mask_id, mixer_depth;
 
 	if (of_device_is_compatible(mixer->dev->of_node, "st,stih418-compositor")) {
 		shift = 4;
 		mask_id = 0x0f;
+		mixer_depth = GAM_MIXER_NB_DEPTH_LEVEL_STIH418;
 	} else {
 		shift = 3;
 		mask_id = 0x07;
+		mixer_depth = GAM_MIXER_NB_DEPTH_LEVEL_STIH407;
 	}
 
 	switch (plane->desc) {
@@ -285,6 +311,18 @@ int sti_mixer_set_plane_depth(struct sti_mixer *mixer, struct sti_plane *plane)
 	case STI_HQVDP_0:
 		plane_id = GAM_DEPTH_VID0_ID;
 		break;
+	case STI_HQVDP_1:
+		plane_id = GAM_DEPTH_VID1_ID;
+		break;
+	case STI_GDP_4:
+		plane_id = GAM_DEPTH_GDP4_ID;
+		break;
+	case STI_GDP_5:
+		plane_id = GAM_DEPTH_GDP5_ID;
+		break;
+	case STI_HQVDP_2:
+		plane_id = GAM_DEPTH_VID2_ID;
+		break;
 	case STI_CURSOR:
 		/* no need to set depth for cursor */
 		return 0;
@@ -297,7 +335,7 @@ int sti_mixer_set_plane_depth(struct sti_mixer *mixer, struct sti_plane *plane)
 	val = sti_mixer_reg_read(mixer, GAM_MIXER_CRB);
 	if (of_device_is_compatible(mixer->dev->of_node, "st,stih418-compositor"))
 		val |= ((u64)sti_mixer_reg_read(mixer, GAM_MIXER_CRB2) << 32);
-	for (i = 0; i < GAM_MIXER_NB_DEPTH_LEVEL; i++) {
+	for (i = 0; i < mixer_depth; i++) {
 		mask = mask_id << (shift * i);
 		if ((val & mask) == plane_id << (shift * i))
 			break;
@@ -366,6 +404,14 @@ static u32 sti_mixer_get_plane_mask(struct sti_plane *plane)
 		return GAM_CTL_GDP3_MASK;
 	case STI_HQVDP_0:
 		return GAM_CTL_VID0_MASK;
+	case STI_HQVDP_1:
+		return GAM_CTL_VID1_MASK;
+	case STI_GDP_4:
+		return GAM_CTL_GDP4_MASK;
+	case STI_GDP_5:
+		return GAM_CTL_GDP5_MASK;
+	case STI_HQVDP_2:
+		return GAM_CTL_VID2_MASK;
 	case STI_CURSOR:
 		return GAM_CTL_CURSOR_MASK;
 	default:
