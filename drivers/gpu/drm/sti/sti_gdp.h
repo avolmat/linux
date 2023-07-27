@@ -16,8 +16,14 @@
 struct drm_device;
 struct device;
 
+enum sti_gdp_type {
+	STI_GDP_TYPE_GDP,
+	STI_GDP_TYPE_GDPPLUS,
+};
+
 struct drm_plane *sti_gdp_create(struct drm_device *drm_dev,
-				 struct device *dev, int desc,
+				 struct device *dev, enum sti_gdp_type gdp_type,
+				 int desc,
 				 void __iomem *baseaddr,
 				 unsigned int possible_crtcs,
 				 enum drm_plane_type type);
