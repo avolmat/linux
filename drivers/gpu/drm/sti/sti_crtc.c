@@ -67,6 +67,12 @@ sti_crtc_mode_set(struct drm_crtc *crtc, struct drm_display_mode *mode)
 		pix_clk = compo->clk_pix_aux;
 	}
 
+	/* Enable the mixer processing clock (if applicable) */
+	if (clk_prepare_enable(compo->clk_proc_mixer)) {
+		DRM_INFO("Failed to prepare/enable processing mixer clk\n");
+		goto proc_mixer_error;
+	}
+
 	/* Prepare and enable the compo IP clock */
 	if (clk_prepare_enable(compo_clk)) {
 		DRM_INFO("Failed to prepare/enable compositor clk\n");
@@ -97,6 +103,8 @@ mixer_error:
 pix_error:
 	clk_disable_unprepare(compo_clk);
 compo_error:
+	clk_disable_unprepare(compo->clk_proc_mixer);
+proc_mixer_error:
 	return -EINVAL;
 }
 
@@ -121,6 +129,9 @@ static void sti_crtc_disable(struct drm_crtc *crtc)
 		clk_disable_unprepare(compo->clk_pix_aux);
 		clk_disable_unprepare(compo->clk_compo_aux);
 	}
+
+	/* Disable the mixer clock (if applicable) */
+	clk_disable_unprepare(compo->clk_proc_mixer);
 
 	mixer->status = STI_MIXER_DISABLED;
 }

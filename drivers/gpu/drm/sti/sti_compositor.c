@@ -43,6 +43,23 @@ static const struct sti_compositor_data stih407_compositor_data = {
 	},
 };
 
+/*
+ * stiH418 compositor properties
+ */
+static const struct sti_compositor_data stih418_compositor_data = {
+	.nb_subdev = 8,
+	.subdev_desc = {
+			{STI_GPDPLUS_SUBDEV, (int)STI_GDP_0, 0x00000},
+			{STI_GPDPLUS_SUBDEV, (int)STI_GDP_1, 0x10000},
+			{STI_GPDPLUS_SUBDEV, (int)STI_GDP_2, 0x20000},
+			{STI_GPDPLUS_SUBDEV, (int)STI_GDP_3, 0x30000},
+			{STI_GPD_SUBDEV, (int)STI_GDP_4, 0x40000},
+			{STI_GPD_SUBDEV, (int)STI_GDP_5, 0x50000},
+			{STI_MIXER_MAIN_SUBDEV, STI_MIXER_MAIN, 0x100000},
+			{STI_MIXER_AUX_SUBDEV, STI_MIXER_AUX, 0x110000},
+	},
+};
+
 void sti_compositor_debugfs_init(struct sti_compositor *compo,
 				 struct drm_minor *minor)
 {
@@ -170,6 +187,9 @@ static const struct of_device_id compositor_of_match[] = {
 		.compatible = "st,stih407-compositor",
 		.data = &stih407_compositor_data,
 	}, {
+		.compatible = "st,stih418-compositor",
+		.data = &stih418_compositor_data,
+	}, {
 		/* end node */
 	}
 };
@@ -234,6 +254,12 @@ static int sti_compositor_probe(struct platform_device *pdev)
 	if (IS_ERR(compo->clk_pix_aux)) {
 		DRM_ERROR("Cannot get pix_aux clock\n");
 		return PTR_ERR(compo->clk_pix_aux);
+	}
+
+	compo->clk_proc_mixer = devm_clk_get_optional(dev, "proc_mixer");
+	if (IS_ERR(compo->clk_proc_mixer)) {
+		DRM_ERROR("Cannot get proc_mixer clock\n");
+		return PTR_ERR(compo->clk_proc_mixer);
 	}
 
 	/* Get reset resources */
