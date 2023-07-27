@@ -10,7 +10,6 @@
 #define VTG_TOP_FIELD_EVENT     1
 #define VTG_BOTTOM_FIELD_EVENT  2
 
-#define VTG_SYNC_ID_HDMI        1
 #define VTG_SYNC_ID_HDDCS       2
 #define VTG_SYNC_ID_HDF         3
 #define VTG_SYNC_ID_DVO         4
