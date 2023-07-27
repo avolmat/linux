@@ -2,7 +2,7 @@ STMicroelectronics stih4xx platforms
 
 - sti-vtg: video timing generator
   Required properties:
-  - compatible: "st,vtg"
+  - compatible: "st,vtg" or "st,stih418-vtg"
   - reg: Physical base address of the IP registers and length of memory mapped region.
   Optional properties:
   - interrupts : VTG interrupt number to the CPU.
