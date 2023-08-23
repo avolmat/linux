@@ -1,0 +1,14 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (C) 2021 STMicroelectronics
+ * Author: Jerome Audu <jau@free.fr>
+ */
+/dts-v1/;
+
+#include "stih418-b2264.dts"
+/ {
+	model = "STiH418 B2264 with Box";
+	compatible = "st,stih418-b2264-box", "st,stih418-b2264", "st,stih418";
+	soc {
+	};
+};
