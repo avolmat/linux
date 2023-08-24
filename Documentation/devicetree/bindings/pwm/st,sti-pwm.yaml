@@ -39,11 +39,6 @@ properties:
     description: Number of available PWM channels.
     enum: [ 0, 1, 2, 3, 4 ]
 
-  st,capture-num-chan:
-    $ref: /schemas/types.yaml#/definitions/uint32
-    description: Number of available Capture channels.
-    enum: [ 0, 1, 2, 3, 4 ]
-
   "#pwm-cells":
     const: 2
 
