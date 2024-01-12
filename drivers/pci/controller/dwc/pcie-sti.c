@@ -18,6 +18,7 @@
 #include <linux/of_pci.h>
 #include <linux/of_platform.h>
 #include <linux/phy/phy.h>
+#include <linux/platform_device.h>
 #include <linux/regmap.h>
 #include <linux/reset.h>
 
@@ -281,7 +282,7 @@ static int st_pcie_start_link(struct dw_pcie *dw)
 }
 
 static struct dw_pcie_host_ops st_pcie_host_ops = {
-	.host_init = st_pcie_host_init,
+	.init = st_pcie_host_init,
 };
 
 static const struct dw_pcie_ops dw_pcie_ops = {
@@ -290,9 +291,10 @@ static const struct dw_pcie_ops dw_pcie_ops = {
 
 static int st_pcie_probe(struct platform_device *pdev)
 {
+	struct device *dev = &pdev->dev;
 	struct st_pcie *pcie;
 	struct dw_pcie *dw;
-	struct device_node *np = pdev->dev.of_node;
+	struct device_node *np = dev->of_node;
 	struct dw_pcie_rp *pp;
 	int ret;
 
