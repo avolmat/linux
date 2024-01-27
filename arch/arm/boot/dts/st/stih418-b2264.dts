@@ -73,6 +73,16 @@
 		ethernet0 = &ethernet0;
 	};
 
+	gpio-keys {
+		compatible = "gpio-keys";
+		autorepeat;
+		button-0 {
+			label = "User";
+			linux,code = <BTN_1>;
+			gpios = <&pio3 3 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
 	leds {
 		compatible = "gpio-leds";
 		led-green {
