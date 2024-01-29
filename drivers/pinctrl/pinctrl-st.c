@@ -727,6 +727,19 @@ static int st_gpio_direction_output(struct gpio_chip *chip,
 	return pinctrl_gpio_direction_output(chip, offset);
 }
 
+static int st_gpio_to_irq(struct gpio_chip *chip, unsigned int offset)
+{
+	struct st_gpio_bank *bank = gpiochip_get_data(chip);
+	struct irq_fwspec fwspec;
+
+	fwspec.fwnode = bank->gpio_chip.fwnode;
+	fwspec.param_count = 2;
+	fwspec.param[0] = offset;
+	fwspec.param[1] = IRQ_TYPE_NONE;
+
+	return irq_create_fwspec_mapping(&fwspec);
+}
+
 static int st_gpio_get_direction(struct gpio_chip *chip, unsigned offset)
 {
 	struct st_gpio_bank *bank = gpiochip_get_data(chip);
@@ -1482,6 +1495,7 @@ static const struct gpio_chip st_gpio_template = {
 	.set			= st_gpio_set,
 	.direction_input	= pinctrl_gpio_direction_input,
 	.direction_output	= st_gpio_direction_output,
+	.to_irq			= st_gpio_to_irq,
 	.get_direction		= st_gpio_get_direction,
 	.ngpio			= ST_GPIO_PINS_PER_BANK,
 };
