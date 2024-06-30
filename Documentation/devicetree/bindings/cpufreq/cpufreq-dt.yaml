@@ -1,0 +1,74 @@
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/cpufreq/cpufreq-dt.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Generic CPUFreq driver
+
+description: |
+  It is a generic DT based cpufreq driver for frequency management.  It
+  supports both uniprocessor (UP) and symmetric multiprocessor (SMP) systems
+  which share clock and voltage across all CPUs.
+
+  Both required and optional properties listed below must be defined under node
+  /cpus/cpu@0.
+
+properties:
+  operating-points:
+    description: |
+      Refer to Documentation/devicetree/bindings/opp/opp-v1.yaml for details.
+      OPPs *must* be supplied either via DT, i.e. this property, or populated
+      at runtime.
+
+  clock-latency:
+    description: |
+      Specify the possible maximum transition latency for clock, in unit of
+      nanoseconds.
+
+  voltage-tolerance:
+    description: the CPU voltage tolerance in percentage.
+
+  "#cooling-cells":
+    description: |
+     Please refer to
+     Documentation/devicetree/bindings/thermal/thermal-cooling-devices.yaml.
+
+examples:
+  - |
+
+    cpus {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        cpu@0 {
+            compatible = "arm,cortex-a9";
+            reg = <0>;
+            next-level-cache = <&L2>;
+            operating-points = <
+                /* kHz    uV */
+                792000  1100000
+                396000  950000
+                198000  850000>;
+            clock-latency = <61036>; /* two CLK32 periods */
+            #cooling-cells = <2>;
+        };
+
+        cpu@1 {
+            compatible = "arm,cortex-a9";
+            reg = <1>;
+            next-level-cache = <&L2>;
+        };
+
+        cpu@2 {
+            compatible = "arm,cortex-a9";
+            reg = <2>;
+            next-level-cache = <&L2>;
+        };
+
+        cpu@3 {
+            compatible = "arm,cortex-a9";
+            reg = <3>;
+            next-level-cache = <&L2>;
+        };
+    };
