@@ -294,13 +294,13 @@
 		};
 
 		/* Display */
-		vtg_main: sti-vtg-main@8d02800 {
+		vtg_main: vtg@8d02800 {
 			compatible = "st,vtg";
 			reg = <0x8d02800 0x200>;
 			interrupts = <GIC_SPI 108 IRQ_TYPE_LEVEL_HIGH>;
 		};
 
-		vtg_aux: sti-vtg-aux@8d00200 {
+		vtg_aux: vtg@8d00200 {
 			compatible = "st,vtg";
 			reg = <0x8d00200 0x100>;
 			interrupts = <GIC_SPI 109 IRQ_TYPE_LEVEL_HIGH>;
