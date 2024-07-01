@@ -10,56 +10,193 @@ STMicroelectronics stih4xx platforms
   - clock-names: names of the clocks listed in clocks property in the same
     order.
 
-- sti-display-subsystem: Master device for DRM sub-components
-  This device must be the parent of all the sub-components and is responsible
-  of bind them.
-  Required properties:
-  - compatible: "st,sti-display-subsystem"
-  - ranges: to allow probing of subdevices
+####################################################################################
 
-- sti-compositor: frame compositor engine
+title: STMicroelectronics STi DRM master device
+
+maintainers:
+  - Patrice Chotard <patrice.chotard@foss.st.com>
+  - Alain Volmat <alain.volmat@foss.st.com>
+
+description: |
+  The STMicroelectronics STi DRM master device is a virtual device needed to
+  list all the display interface nodes that encapsulate the graphics subsystem.
+
+properties:
+  compatible:
+    const: st,sti-display-subsystem
+
+  ports:
+    $ref: /schemas/types.yaml#/definitions/phandle-array
+    items:
+      maxItems: 1
+    description: |
+      Should contain a list of phandles pointing to display interface port
+      of display controller devices.
+
+required:
+  - compatible
+  - ports
+  - ranges: to allow probing of subdevices ???
+
+additionalProperties: false
+
+examples:
+  - |
+    display-subsystem {
+        compatible = "st,sti-display-subsystem";
+        ports = <&display_compositor>;
+    };
+
+####################################################################################
+- sti-compositor: 
   must be a child of sti-display-subsystem
+
+title: STMicroelectronics STi DRM compositor device
+
+maintainers:
+  - Patrice Chotard <patrice.chotard@foss.st.com>
+  - Alain Volmat <alain.volmat@foss.st.com>
+
+description: |
+	TODO
+	frame compositor engine
+
+properties:
+  compatible:
+    const: st,sti407-compositor
+
+  reg:
+    maxItems: 1
+
+  clocks:
+    maxItems: 10
+
+  clock-names:
+    items:
+      - const: compo_main
+      - const: compo_aux
+      - const: pix_main
+      - const: pix_aux
+      - const: pix_gdp1
+      - const: pix_gdp2
+      - const: pix_gdp3
+      - const: pix_gdp4
+      - const: main_parent
+      - const: aux_parent
+
+  resets:
+    maxItems: 2
+
+  reset-names:
+    items:
+      - const: compo-main
+      - const: compo-aux
+
+  st,vtg:
+    description: phandle(s) on vtg device (main and aux) nodes.
+
+required:
+  - compatible
+  - reg
+  - clocks
+  - clock-names
+  - resets
+  - reset-names
+  - ports
+  - st,vtg ??
+
+additionalProperties: false
+
+examples:
+  - |
+	TODO
+####################################################################################
+
+title: STMicroelectronics STi video out hardware block device
+
+maintainers:
+  - Patrice Chotard <patrice.chotard@foss.st.com>
+  - Alain Volmat <alain.volmat@foss.st.com>
+
+description: |
+	TODO sti-tvout video out hardware block
+
+properties:
+  compatible:
+    const: st,sti407-tvout
+
+  reg:
+    maxItems: 1
+
+  resets:
+    maxItems: 1
+
+  reset-names:
+    items:
+      - const: tvout
+
+required:
+  - compatible
+  - reg
+  - resets
+  - reset-names
+  - ports ???
+
   Required properties:
-  - compatible: "st,stih<chip>-compositor"
-  - reg: Physical base address of the IP registers and length of memory mapped region.
-  - clocks: from common clock binding: handle hardware IP needed clocks, the
-    number of clocks may depend of the SoC type.
-    See ../clocks/clock-bindings.txt for details.
-  - clock-names: names of the clocks listed in clocks property in the same
-    order.
   - resets: resets to be used by the device
     See ../reset/reset.txt for details.
   - reset-names: names of the resets listed in resets property in the same
     order.
-  - st,vtg: phandle(s) on vtg device (main and aux) nodes.
+####################################################################################
 
-- sti-tvout: video out hardware block
-  must be a child of sti-display-subsystem
-  Required properties:
-  - compatible: "st,stih<chip>-tvout"
-  - reg: Physical base address of the IP registers and length of memory mapped region.
-  - reg-names: names of the mapped memory regions listed in regs property in
-    the same order.
-  - resets: resets to be used by the device
-    See ../reset/reset.txt for details.
-  - reset-names: names of the resets listed in resets property in the same
-    order.
+title: STMicroelectronics STi HDMI output block device
 
-- sti-hdmi: hdmi output block
-  must be a child of sti-display-subsystem
-  Required properties:
-  - compatible: "st,stih<chip>-hdmi";
-  - reg: Physical base address of the IP registers and length of memory mapped region.
-  - reg-names: names of the mapped memory regions listed in regs property in
-    the same order.
-  - interrupts : HDMI interrupt number to the CPU.
-  - interrupt-names: names of the interrupts listed in interrupts property in
-    the same order
-  - clocks: from common clock binding: handle hardware IP needed clocks, the
-    number of clocks may depend of the SoC type.
-  - clock-names: names of the clocks listed in clocks property in the same
-    order.
+maintainers:
+  - Patrice Chotard <patrice.chotard@foss.st.com>
+  - Alain Volmat <alain.volmat@foss.st.com>
+
+description: |
+	TODO sti-hdmi: hdmi output block
+
+properties:
+  compatible:
+    const: st,sti407-hdmi
+
+  reg:
+    maxItems: 1
+
+  clocks:
+    maxItems: 6
+
+  clock-names:
+    items:
+      - const: pix
+      - const: tmds
+      - const: phy
+      - const: audio
+      - const: main_parent
+      - const: aux_parent
+
+  resets:
+    maxItems: 1
+
+  reset-names:
+    - const: hdmi
+
+required:
+  - compatible
+  - reg
+  - reg-name
+  - interrupts
+  - interrupt-names
+  - resets
+  - reset-names
+  - ports ???
+  - ddc ??
+
   - ddc: phandle of an I2C controller used for DDC EDID probing
+####################################################################################
 
 sti-hda:
   Required properties:
@@ -73,6 +210,7 @@ sti-hda:
     See ../clocks/clock-bindings.txt for details.
   - clock-names: names of the clocks listed in clocks property in the same
     order.
+####################################################################################
 
 sti-dvo:
   Required properties:
@@ -89,6 +227,7 @@ sti-dvo:
   - pinctrl-0: pin control handle
   - pinctrl-names: names of the pin control states to use
   - sti,panel: phandle of the panel connected to the DVO output
+####################################################################################
 
 sti-hqvdp:
   must be a child of sti-display-subsystem
