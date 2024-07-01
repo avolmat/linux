@@ -852,12 +852,7 @@ static int sti_tvout_probe(struct platform_device *pdev)
 	tvout->dev = dev;
 
 	/* get memory resources */
-	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "tvout-reg");
-	if (!res) {
-		DRM_ERROR("Invalid glue resource\n");
-		return -ENOMEM;
-	}
-	tvout->regs = devm_ioremap(dev, res->start, resource_size(res));
+	tvout->regs = devm_platform_ioremap_resource(pdev, 0);
 	if (!tvout->regs)
 		return -ENOMEM;
 
