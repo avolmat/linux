@@ -12,6 +12,7 @@
 #include <linux/of_device.h>
 
 #include "st_thermal.h"
+#include "../thermal_core.h"
 #include "../thermal_hwmon.h"
 
 /* The Thermal Framework expects millidegrees */
