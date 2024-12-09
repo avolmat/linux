@@ -115,22 +115,28 @@ static const struct drm_mode_config_funcs sti_mode_config_funcs = {
 	.atomic_commit = drm_atomic_helper_commit,
 };
 
-static void sti_mode_config_init(struct drm_device *dev)
+static int sti_mode_config_init(struct sti_drm_device *sti)
 {
-	dev->mode_config.min_width = 0;
-	dev->mode_config.min_height = 0;
+	struct drm_device *ddev = &sti->ddev;
+	int ret = 0;
+
+	ret = drmm_mode_config_init(&sti->ddev);
+	if (ret < 0)
+		return ret;
 
 	/*
 	 * set max width and height as default value.
 	 * this value would be used to check framebuffer size limitation
 	 * at drm_mode_addfb().
 	 */
-	dev->mode_config.max_width = STI_MAX_FB_WIDTH;
-	dev->mode_config.max_height = STI_MAX_FB_HEIGHT;
+	ddev->mode_config.min_width = 0;
+	ddev->mode_config.min_height = 0;
+	ddev->mode_config.max_width = STI_MAX_FB_WIDTH;
+	ddev->mode_config.max_height = STI_MAX_FB_HEIGHT;
+	ddev->mode_config.funcs = &sti_mode_config_funcs;
+	ddev->mode_config.normalize_zpos = true;
 
-	dev->mode_config.funcs = &sti_mode_config_funcs;
-
-	dev->mode_config.normalize_zpos = true;
+	return 0;
 }
 
 DEFINE_DRM_GEM_DMA_FOPS(sti_driver_fops);
@@ -149,71 +155,53 @@ static const struct drm_driver sti_driver = {
 	.minor = DRIVER_MINOR,
 };
 
-static int sti_init(struct drm_device *ddev)
-{
-	struct sti_private *private;
-
-	private = kzalloc(sizeof(*private), GFP_KERNEL);
-	if (!private)
-		return -ENOMEM;
-
-	ddev->dev_private = (void *)private;
-	dev_set_drvdata(ddev->dev, ddev);
-	private->drm_dev = ddev;
-
-	drm_mode_config_init(ddev);
-
-	sti_mode_config_init(ddev);
-
-	drm_kms_helper_poll_init(ddev);
-
-	return 0;
-}
-
 static void sti_cleanup(struct drm_device *ddev)
 {
-	struct sti_private *private = ddev->dev_private;
-
 	drm_kms_helper_poll_fini(ddev);
 	drm_atomic_helper_shutdown(ddev);
 	drm_mode_config_cleanup(ddev);
 	component_unbind_all(ddev->dev, ddev);
 	dev_set_drvdata(ddev->dev, NULL);
-	kfree(private);
-	ddev->dev_private = NULL;
 }
 
 static int sti_bind(struct device *dev)
 {
-	struct drm_device *ddev;
+	struct sti_drm_device *sti;
 	int ret;
 
-	ddev = drm_dev_alloc(&sti_driver, dev);
-	if (IS_ERR(ddev))
-		return PTR_ERR(ddev);
+	sti = devm_drm_dev_alloc(dev, &sti_driver, struct sti_drm_device, ddev);
+	if (IS_ERR(sti))
+		return PTR_ERR(sti);
 
-	ret = sti_init(ddev);
-	if (ret)
+	sti->dev = dev;
+	dev_set_drvdata(dev, &sti->ddev);
+
+	ret = sti_mode_config_init(sti);
+	if (ret < 0)
 		goto err_drm_dev_put;
 
-	ret = component_bind_all(ddev->dev, ddev);
+	drm_kms_helper_poll_init(&sti->ddev);
+
+	ret = component_bind_all(dev, &sti->ddev);
 	if (ret)
 		goto err_cleanup;
 
-	ret = drm_dev_register(ddev, 0);
+	ret = drm_dev_register(&sti->ddev, 0);
 	if (ret)
 		goto err_cleanup;
 
-	drm_mode_config_reset(ddev);
+	drm_mode_config_reset(&sti->ddev);
 
-	drm_client_setup(ddev, NULL);
+	drm_client_setup(&sti->ddev, NULL);
 
 	return 0;
 
 err_cleanup:
-	sti_cleanup(ddev);
+	sti_cleanup(&sti->ddev);
 err_drm_dev_put:
-	drm_dev_put(ddev);
+	dev_set_drvdata(dev, NULL);
+	drm_dev_put(&sti->ddev);
+
 	return ret;
 }
 
@@ -316,11 +304,11 @@ static int sti_platform_probe(struct platform_device *pdev)
 	if (IS_ERR(match)) {
 		list_for_each_entry(link, &dev->links.consumers, s_node)
 			device_link_del(link);
-		return ERR_PTR(match);
+		return PTR_ERR(match);
 	}
 
 	if (!match)
-		return ERR_PTR(-ENODEV);
+		return -ENODEV;
 
 	child_np = of_get_next_available_child(node, NULL);
 

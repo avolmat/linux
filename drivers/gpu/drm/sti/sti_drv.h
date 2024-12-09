@@ -7,6 +7,8 @@
 #ifndef _STI_DRV_H_
 #define _STI_DRV_H_
 
+#include <drm/drm_crtc.h>
+#include <drm/drm_device.h>
 #include <linux/platform_device.h>
 
 struct drm_device;
@@ -14,13 +16,24 @@ struct drm_property;
 struct sti_compositor;
 
 /**
- * STI drm private structure
+ * STI drm structure
  * This structure is stored as private in the drm_device
  *
- * @compo:                 compositor
- * @plane_zorder_property: z-order property for CRTC planes
- * @drm_dev:               drm device
+ * @dev:			Pointer to the device
+ * @ddev:			DRM device
+ * @crtc:			DRM CRTC
+ * @compo:			STi compositor
+ * @plane_zorder_property:	z-order property for CRTC planes
  */
+struct sti_drm_device {
+	struct device *dev;
+	struct drm_device ddev;
+
+	struct drm_crtc crtc;
+	struct sti_compositor *compo;
+	struct drm_property *plane_zorder_property;
+};
+
 struct sti_private {
 	struct sti_compositor *compo;
 	struct drm_property *plane_zorder_property;
