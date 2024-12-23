@@ -219,44 +219,6 @@ static const struct component_master_ops sti_ops = {
 	.unbind = sti_unbind,
 };
 
-static int sti_platform_parse_dt(struct device *dev)
-{
-	struct device_node *np = dev->of_node;
-	struct device_node *port;
-	bool found = false;
-	int i;
-
-	if (!np)
-		return -ENODEV;
-
-	for (i = 0;; i++) {
-		port = of_parse_phandle(np, "ports", i);
-		if (port)
-			break;
-
-		if (!of_device_is_available(port->parent)) {
-			of_node_put(port);
-			continue;
-		}
-
-		found = true;
-		of_node_put(port);
-	}
-
-	if (i == 0) {
-		DRM_DEV_ERROR(dev, "missing 'ports' property\n");
-		return -ENODEV;
-	}
-
-	if (!found) {
-		DRM_DEV_ERROR(dev,
-			      "No available compositor found for display-subsystem.\n");
-		return -ENODEV;
-	}
-
-	return 0;
-}
-
 static struct platform_driver *drivers[] = {
 	&sti_tvout_driver,
 	&sti_hqvdp_driver,
@@ -276,49 +238,12 @@ static int sti_platform_probe(struct platform_device *pdev)
 	struct component_match *match = NULL;
 	int ret, i;
 
-	dma_set_coherent_mask(dev, DMA_BIT_MASK(32));
-
-	devm_of_platform_populate(dev);
-
-	ret = sti_platform_parse_dt(dev);
+	ret = dma_set_coherent_mask(dev, DMA_BIT_MASK(32));
 	if (ret)
 		return ret;
 
-	for(i = 0; i < ARRAY_SIZE(drivers); i++) {
-		struct platform_driver *drv = drivers[i];
-		struct device *p = NULL, *d;
 
-		do {
-			d = platform_find_device_by_driver(p, &drv->driver);
-			put_device(p);
-			p = d;
-
-			if (!d)
-				break;
-
-			device_link_add(dev, d, DL_FLAG_STATELESS);
-			component_match_add(dev, &match, component_compare_dev, d);
-		} while (true);
-	}
-
-	if (IS_ERR(match)) {
-		list_for_each_entry(link, &dev->links.consumers, s_node)
-			device_link_del(link);
-		return PTR_ERR(match);
-	}
-
-	if (!match)
-		return -ENODEV;
-
-	child_np = of_get_next_available_child(node, NULL);
-
-	while (child_np) {
-		drm_of_component_match_add(dev, &match, component_compare_of,
-					   child_np);
-		child_np = of_get_next_available_child(node, child_np);
-	}
-
-	return component_master_add_with_match(dev, &sti_ops, match);
+	return drm_of_component_probe(dev, component_compare_of, &sti_ops);
 }
 
 static void sti_platform_remove(struct platform_device *pdev)
