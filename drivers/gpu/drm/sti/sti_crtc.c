@@ -225,12 +225,6 @@ static const struct drm_crtc_helper_funcs sti_crtc_helper_funcs = {
 	.atomic_disable = sti_crtc_atomic_disable,
 };
 
-static void sti_crtc_destroy(struct drm_crtc *crtc)
-{
-	DRM_DEBUG_KMS("\n");
-	drm_crtc_cleanup(crtc);
-}
-
 static int sti_crtc_set_property(struct drm_crtc *crtc,
 				 struct drm_property *property,
 				 uint64_t val)
@@ -324,7 +318,6 @@ static int sti_crtc_late_register(struct drm_crtc *crtc)
 static const struct drm_crtc_funcs sti_crtc_funcs = {
 	.set_config = drm_atomic_helper_set_config,
 	.page_flip = drm_atomic_helper_page_flip,
-	.destroy = sti_crtc_destroy,
 	.set_property = sti_crtc_set_property,
 	.reset = drm_atomic_helper_crtc_reset,
 	.atomic_duplicate_state = drm_atomic_helper_crtc_duplicate_state,
@@ -350,8 +343,8 @@ int sti_crtc_init(struct drm_device *drm_dev, struct sti_mixer *mixer,
 	struct drm_crtc *crtc = &mixer->drm_crtc;
 	int res;
 
-	res = drm_crtc_init_with_planes(drm_dev, crtc, primary, cursor,
-					&sti_crtc_funcs, NULL);
+	res = drmm_crtc_init_with_planes(drm_dev, crtc, primary, cursor,
+					 &sti_crtc_funcs, NULL);
 	if (res) {
 		DRM_ERROR("Can't initialize CRTC\n");
 		return -EINVAL;
