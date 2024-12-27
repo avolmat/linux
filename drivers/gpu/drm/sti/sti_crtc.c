@@ -282,8 +282,7 @@ static int sti_crtc_enable_vblank(struct drm_crtc *crtc)
 {
 	struct drm_device *dev = crtc->dev;
 	unsigned int pipe = crtc->index;
-	struct sti_private *dev_priv = dev->dev_private;
-	struct sti_compositor *compo = dev_priv->compo;
+	struct sti_compositor *compo = to_sti_compositor(crtc);
 	struct notifier_block *vtg_vblank_nb = &compo->vtg_vblank_nb[pipe];
 	struct sti_vtg *vtg = compo->vtg[pipe];
 
@@ -301,8 +300,7 @@ static void sti_crtc_disable_vblank(struct drm_crtc *crtc)
 {
 	struct drm_device *drm_dev = crtc->dev;
 	unsigned int pipe = crtc->index;
-	struct sti_private *priv = drm_dev->dev_private;
-	struct sti_compositor *compo = priv->compo;
+	struct sti_compositor *compo = to_sti_compositor(crtc);
 	struct notifier_block *vtg_vblank_nb = &compo->vtg_vblank_nb[pipe];
 	struct sti_vtg *vtg = compo->vtg[pipe];
 

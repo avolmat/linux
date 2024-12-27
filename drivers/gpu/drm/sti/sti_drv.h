@@ -34,12 +34,6 @@ struct sti_drm_device {
 	struct drm_property *plane_zorder_property;
 };
 
-struct sti_private {
-	struct sti_compositor *compo;
-	struct drm_property *plane_zorder_property;
-	struct drm_device *drm_dev;
-};
-
 extern struct platform_driver sti_tvout_driver;
 extern struct platform_driver sti_hqvdp_driver;
 extern struct platform_driver sti_hdmi_driver;

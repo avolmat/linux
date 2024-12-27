@@ -64,13 +64,11 @@ static int sti_compositor_bind(struct device *dev,
 	struct sti_compositor *compo = dev_get_drvdata(dev);
 	struct drm_device *drm_dev = data;
 	unsigned int i, mixer_id = 0, vid_id = 0, crtc_id = 0;
-	struct sti_private *dev_priv = drm_dev->dev_private;
 	struct drm_plane *cursor = NULL;
 	struct drm_plane *primary = NULL;
 	struct sti_compositor_subdev_descriptor *desc = compo->data.subdev_desc;
 	unsigned int array_size = compo->data.nb_subdev;
 
-	dev_priv->compo = compo;
 
 	/* Register mixer subdev and video subdev first */
 	for (i = 0; i < array_size; i++) {

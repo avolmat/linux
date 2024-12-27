@@ -12,6 +12,8 @@
 #include <linux/clk.h>
 #include <linux/kernel.h>
 
+#include <drm/drm_crtc.h>
+
 #include "sti_mixer.h"
 #include "sti_plane.h"
 
@@ -64,6 +66,7 @@ struct sti_compositor_data {
  * @vtg_vblank_nb: array of callbacks for VTG VSYNC notification
  */
 struct sti_compositor {
+	struct drm_crtc crtc;
 	struct device *dev;
 	void __iomem *regs;
 	struct sti_compositor_data data;
@@ -78,6 +81,8 @@ struct sti_compositor {
 	struct sti_vtg *vtg[STI_MAX_MIXER];
 	struct notifier_block vtg_vblank_nb[STI_MAX_MIXER];
 };
+
+#define to_sti_compositor(c)		container_of(c, struct sti_compositor, crtc)
 
 void sti_compositor_debugfs_init(struct sti_compositor *compo,
 				 struct drm_minor *minor);
