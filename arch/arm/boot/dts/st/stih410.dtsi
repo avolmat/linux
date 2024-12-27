@@ -188,7 +188,6 @@
 		sti-tvout@8d08000 {
 			compatible = "st,stih407-tvout";
 			reg = <0x8d08000 0x1000>;
-			reg-names = "tvout-reg";
 			reset-names = "tvout";
 			resets = <&softreset STIH407_HDTVOUT_SOFTRESET>;
 			#address-cells = <1>;
