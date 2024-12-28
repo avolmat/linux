@@ -232,11 +232,7 @@ static struct platform_driver *drivers[] = {
 static int sti_platform_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
-	struct device_node *node = dev->of_node;
-	struct device_node *child_np;
-	struct device_link *link;
-	struct component_match *match = NULL;
-	int ret, i;
+	int ret;
 
 	ret = dma_set_coherent_mask(dev, DMA_BIT_MASK(32));
 	if (ret)

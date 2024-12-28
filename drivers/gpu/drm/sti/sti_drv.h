@@ -21,7 +21,6 @@ struct sti_compositor;
  *
  * @dev:			Pointer to the device
  * @ddev:			DRM device
- * @crtc:			DRM CRTC
  * @compo:			STi compositor
  * @plane_zorder_property:	z-order property for CRTC planes
  */
@@ -29,8 +28,8 @@ struct sti_drm_device {
 	struct device *dev;
 	struct drm_device ddev;
 
-	struct drm_crtc crtc;
 	struct sti_compositor *compo;
+	struct 
 	struct drm_property *plane_zorder_property;
 };
 
