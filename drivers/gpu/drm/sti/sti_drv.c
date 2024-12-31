@@ -228,31 +228,35 @@ static const struct component_master_ops sti_ops = {
 	.unbind = sti_unbind,
 };
 
+static void sti_drm_match_remove(struct device *dev);
+static struct component_match *sti_drm_match_add(struct device *dev);
+
 static int sti_platform_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
-	struct device_node *node = dev->of_node;
-	struct device_node *child_np;
 	struct component_match *match = NULL;
+	int ret;
 
 	dma_set_coherent_mask(dev, DMA_BIT_MASK(32));
 
-	devm_of_platform_populate(dev);
+	match = sti_drm_match_add(dev);
+	if (IS_ERR(match))
+		return PTR_ERR(match);
 
-	child_np = of_get_next_available_child(node, NULL);
-
-	while (child_np) {
-		drm_of_component_match_add(dev, &match, component_compare_of,
-					   child_np);
-		child_np = of_get_next_available_child(node, child_np);
+	ret = component_master_add_with_match(dev, &sti_ops, match);
+	if (ret < 0) {
+		sti_drm_match_remove(dev);
+		return ret;
 	}
 
-	return component_master_add_with_match(dev, &sti_ops, match);
+	return ret;
 }
 
 static void sti_platform_remove(struct platform_device *pdev)
 {
 	component_master_del(&pdev->dev, &sti_ops);
+
+	sti_drm_match_remove(&pdev->dev);
 }
 
 static void sti_platform_shutdown(struct platform_device *pdev)
@@ -286,6 +290,64 @@ static struct platform_driver * const drivers[] = {
 	&sti_compositor_driver,
 	&sti_platform_driver,
 };
+
+static void sti_drm_match_remove(struct device *dev)
+{
+	struct device_link *link;
+
+	list_for_each_entry(link, &dev->links.consumers, s_node)
+		device_link_del(link);
+}
+
+static void sti_drm_add_match(struct device *dev,
+			      struct component_match **match,
+			      struct platform_driver *drv)
+{
+	struct device *d;
+
+	d = platform_find_device_by_driver(NULL, &drv->driver);
+	if (!d)
+		return;
+
+	dev_err(dev, "Add match against %s\n", drv->driver.name);
+
+	device_link_add(dev, d, DL_FLAG_STATELESS);
+	component_match_add(dev, match, component_compare_dev, d);
+	put_device(d);
+}
+
+static struct component_match *sti_drm_match_add(struct device *dev)
+{
+	struct component_match *match = NULL;
+	struct device_node *port;
+	int i;
+
+	/* Add the encoder and video plane first (TVOUT/HQVDP) */
+	sti_drm_add_match(dev, &match, &sti_tvout_driver);
+	sti_drm_add_match(dev, &match, &sti_hqvdp_driver);
+
+	/* add identified port(s) device match before adding driver device matches */
+	for (i = 0; ; i++) {
+		port = of_parse_phandle(dev->of_node, "ports", i);
+		if (!port)
+			break;
+
+		if (of_device_is_available(port->parent))
+			drm_of_component_match_add(dev, &match,
+						   component_compare_of,
+						   port->parent);
+
+		of_node_put(port);
+	}
+
+	/* At the end, add compositor */
+	sti_drm_add_match(dev, &match, &sti_compositor_driver);
+
+	if (IS_ERR(match))
+		sti_drm_match_remove(dev);
+
+	return match ?: ERR_PTR(-ENODEV);
+}
 
 static int sti_drm_init(void)
 {
