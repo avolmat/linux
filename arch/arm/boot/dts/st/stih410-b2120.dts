@@ -57,10 +57,8 @@
 			status = "okay";
 		};
 
-		sti-display-subsystem@0 {
-			sti-hda@8d02000 {
-				status = "okay";
-			};
+		sti-hda@8d02000 {
+			status = "okay";
 		};
 	};
 };
