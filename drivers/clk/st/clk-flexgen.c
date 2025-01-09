@@ -164,6 +164,9 @@ static int flexgen_set_rate(struct clk_hw *hw, unsigned long rate,
 	int ret = 0;
 	u32 reg;
 
+	if (!rate)
+		return -EINVAL;
+
 	__clk_hw_set_clk(pdiv_hw, hw);
 	__clk_hw_set_clk(fdiv_hw, hw);
 
