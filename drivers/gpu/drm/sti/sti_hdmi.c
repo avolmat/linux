@@ -1032,6 +1032,11 @@ sti_hdmi_connector_mode_valid(struct drm_connector *connector,
 		return MODE_BAD;
 	}
 
+	if (target >= 340000000) {
+		DRM_DEBUG_DRIVER("hdmi pixclk=%d not supported\n", target);
+		return MODE_BAD;
+	}
+
 	return MODE_OK;
 }
 
