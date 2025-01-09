@@ -819,6 +819,9 @@ static long quadfs_round_rate(struct clk_hw *hw, unsigned long rate,
 {
 	struct stm_fs params;
 
+	if (!rate)
+		return 0;
+
 	rate = quadfs_find_best_rate(hw, rate, *prate, &params);
 
 	pr_debug("%s: %s new rate %ld [sdiv=0x%x,md=0x%x,pe=0x%x,nsdiv3=%u]\n",
